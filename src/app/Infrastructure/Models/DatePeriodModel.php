@@ -11,6 +11,7 @@ class DatePeriodModel extends Model
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
+    public $timestamps = false;
     protected $fillable = ['id', 'project_id', 'assignee_id', 'start_date', 'end_date'];
 
     public function project()

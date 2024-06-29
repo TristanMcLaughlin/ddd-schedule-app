@@ -30,4 +30,9 @@ class EloquentDatePeriodRepository implements DatePeriodRepository
             ]
         );
     }
+
+    public function deleteByProjectId(string $projectId): void
+    {
+        DatePeriodModel::where('project_id', $projectId)->delete();
+    }
 }
