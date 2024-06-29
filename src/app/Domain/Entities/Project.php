@@ -8,7 +8,8 @@ readonly class Project
         private readonly string $id,
         private readonly string $name,
         private readonly string $buildStatus,
-        private readonly string $ragStatus
+        private readonly string $ragStatus,
+        private readonly array $datePeriods
     ) {}
 
     public function getId(): string
@@ -29,5 +30,10 @@ readonly class Project
     public function getRagStatus(): string
     {
         return $this->ragStatus;
+    }
+
+    public function getDatePeriods(): array
+    {
+        return $this->datePeriods;
     }
 }

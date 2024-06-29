@@ -31,4 +31,11 @@ class EloquentProjectRepository implements ProjectRepository
 
         $projectModel->datePeriods()->delete();
     }
+
+    public function allProjectsWithDatePeriods()
+    {
+        return ProjectModel::with('datePeriods')
+            ->get()
+            ->map->toDomainEntity();
+    }
 }

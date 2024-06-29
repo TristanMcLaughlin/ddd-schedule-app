@@ -28,4 +28,9 @@ class EloquentAssigneeRepository implements AssigneeRepository
             ]
         );
     }
+
+    public function all()
+    {
+        return AssigneeModel::all()->map->toDomainEntity();
+    }
 }
