@@ -12,9 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('assignees', function (Blueprint $table) {
-            $table->uuid('id')->unique()->primary();
+            $table->string('id')->unique()->primary(); // Use unique string as primary key
             $table->string('name');
-            $table->string('email')->unique();
             $table->string('role')->nullable();
         });
     }

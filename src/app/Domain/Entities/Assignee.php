@@ -7,7 +7,6 @@ readonly class Assignee
     public function __construct(
         private string  $id,
         private string  $name,
-        private string  $email,
         private ?string $role
     ) {}
 
@@ -19,11 +18,6 @@ readonly class Assignee
     public function getName(): string
     {
         return $this->name;
-    }
-
-    public function getEmail(): string
-    {
-        return $this->email;
     }
 
     public function getRole(): ?string

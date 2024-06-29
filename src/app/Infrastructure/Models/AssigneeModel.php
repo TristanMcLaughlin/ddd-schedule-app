@@ -11,7 +11,7 @@ class AssigneeModel extends Model
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
-    protected $fillable = ['id', 'name', 'email', 'role'];
+    protected $fillable = ['id', 'name', 'role'];
 
     public function datePeriods()
     {
@@ -23,7 +23,6 @@ class AssigneeModel extends Model
         return new Assignee(
             $this->id,
             $this->name,
-            $this->email,
             $this->role
         );
     }
