@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('projects', function (Blueprint $table) {
             $table->string('id')->primary()->unique();  // Use the Jira ID as the primary key
             $table->string('name');
-            $table->text('description')->nullable();
+            $table->string('build_status');
+            $table->string('rag_status');
         });
     }
 

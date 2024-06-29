@@ -20,14 +20,13 @@ class EloquentProjectRepository implements ProjectRepository
 
     public function save(Project $project): void
     {
-        $projectModel = ProjectModel::updateOrCreate(
+        ProjectModel::updateOrCreate(
             ['id' => $project->getId()],
             [
                 'name' => $project->getName(),
-                'description' => $project->getDescription(),
+                'build_status' => $project->getBuildStatus(),
+                'rag_status' => $project->getRagStatus(),
             ]
         );
-
-        // Optionally, if you need to sync date periods or other relations, do it here.
     }
 }

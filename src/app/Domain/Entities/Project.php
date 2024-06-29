@@ -5,9 +5,10 @@ namespace App\Domain\Entities;
 readonly class Project
 {
     public function __construct(
-        private string  $id,
-        private string  $name,
-        private ?string $description
+        private readonly string $id,
+        private readonly string $name,
+        private readonly string $buildStatus,
+        private readonly string $ragStatus
     ) {}
 
     public function getId(): string
@@ -20,8 +21,13 @@ readonly class Project
         return $this->name;
     }
 
-    public function getDescription(): ?string
+    public function getBuildStatus(): string
     {
-        return $this->description;
+        return $this->buildStatus;
+    }
+
+    public function getRagStatus(): string
+    {
+        return $this->ragStatus;
     }
 }

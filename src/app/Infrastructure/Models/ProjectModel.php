@@ -11,7 +11,7 @@ class ProjectModel extends Model
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
-    protected $fillable = ['id', 'name', 'description'];
+    protected $fillable = ['id', 'name', 'build_status', 'rag_status'];
 
     public function datePeriods()
     {
@@ -23,7 +23,8 @@ class ProjectModel extends Model
         return new Project(
             $this->id,
             $this->name,
-            $this->description
+            $this->build_status,
+            $this->rag_status
         );
     }
 }
