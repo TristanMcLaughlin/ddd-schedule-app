@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('date_periods', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary()->unique();
             $table->string('project_id');
+            $table->uuid('assignee_id');
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
-            $table->foreignId('assignee_id')->constrained('assignees')->onDelete('cascade');
+            $table->foreign('assignee_id')->references('id')->on('assignees')->onDelete('cascade');
             $table->date('start_date');
             $table->date('end_date');
-            $table->timestamps();
         });
     }
 

@@ -12,11 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('assignees', function (Blueprint $table) {
-            $table->id()->primary();
+            $table->uuid('id')->unique()->primary();
             $table->string('name');
             $table->string('email')->unique();
             $table->string('role')->nullable();
-            $table->timestamps();
         });
     }
 

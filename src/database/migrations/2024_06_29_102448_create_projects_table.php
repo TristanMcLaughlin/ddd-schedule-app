@@ -15,7 +15,6 @@ return new class extends Migration
             $table->string('id')->primary()->unique();  // Use the Jira ID as the primary key
             $table->string('name');
             $table->text('description')->nullable();
-            $table->timestamps();
         });
     }
 
