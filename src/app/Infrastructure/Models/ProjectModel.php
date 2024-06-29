@@ -11,6 +11,8 @@ class ProjectModel extends Model
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
+    public $timestamps = false;
+
     protected $fillable = ['id', 'name', 'build_status', 'rag_status'];
 
     public function datePeriods()
