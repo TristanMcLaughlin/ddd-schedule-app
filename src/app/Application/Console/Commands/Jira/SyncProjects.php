@@ -3,7 +3,7 @@
 namespace App\Application\Console\Commands\Jira;
 
 use Illuminate\Console\Command;
-use App\Infrastructure\Services\DatePeriods\DatePeriods\JiraRestApiService;
+use App\Infrastructure\Services\JiraRestApiService;
 
 class SyncProjects extends Command
 {
