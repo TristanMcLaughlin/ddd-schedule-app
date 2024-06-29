@@ -20,7 +20,7 @@ class EloquentProjectRepository implements ProjectRepository
 
     public function save(Project $project): void
     {
-        ProjectModel::updateOrCreate(
+        $projectModel = ProjectModel::updateOrCreate(
             ['id' => $project->getId()],
             [
                 'name' => $project->getName(),
@@ -28,5 +28,14 @@ class EloquentProjectRepository implements ProjectRepository
                 'rag_status' => $project->getRagStatus(),
             ]
         );
+
+        $projectModel->datePeriods()->delete();
+    }
+
+    public function allProjectsWithDatePeriods()
+    {
+        return ProjectModel::with('datePeriods')
+            ->get()
+            ->map->toDomainEntity();
     }
 }

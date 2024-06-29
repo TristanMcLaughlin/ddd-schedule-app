@@ -2,6 +2,7 @@
 
 namespace App\Infrastructure\Models;
 
+use App\Domain\Entities\DatePeriod;
 use App\Domain\Entities\Project;
 use Illuminate\Database\Eloquent\Model;
 
@@ -22,11 +23,22 @@ class ProjectModel extends Model
 
     public function toDomainEntity(): Project
     {
+        $datePeriods = $this->datePeriods->map(function ($datePeriodModel) {
+            return new DatePeriod(
+                $datePeriodModel->id,
+                $datePeriodModel->project_id,
+                $datePeriodModel->assignee_id,
+                $datePeriodModel->start_date,
+                $datePeriodModel->end_date
+            );
+        })->all();
+
         return new Project(
             $this->id,
             $this->name,
             $this->build_status,
-            $this->rag_status
+            $this->rag_status,
+            $datePeriods
         );
     }
 }

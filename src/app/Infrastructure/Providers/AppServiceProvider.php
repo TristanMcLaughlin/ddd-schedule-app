@@ -8,6 +8,7 @@ use App\Domain\Repositories\ProjectRepository;
 use App\Infrastructure\Repositories\EloquentAssigneeRepository;
 use App\Infrastructure\Repositories\EloquentDatePeriodRepository;
 use App\Infrastructure\Repositories\EloquentProjectRepository;
+use App\Infrastructure\Services\DatePeriods\AssigneePeriodsFormatterService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,6 +21,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ProjectRepository::class, EloquentProjectRepository::class);
         $this->app->bind(AssigneeRepository::class, EloquentAssigneeRepository::class);
         $this->app->bind(DatePeriodRepository::class, EloquentDatePeriodRepository::class);
+
+        $this->app->singleton(AssigneePeriodsFormatterService::class, function ($app) {
+            return new AssigneePeriodsFormatterService(
+                $app->make(EloquentAssigneeRepository::class),
+                $app->make(EloquentProjectRepository::class),
+            );
+        });
     }
 
     /**
