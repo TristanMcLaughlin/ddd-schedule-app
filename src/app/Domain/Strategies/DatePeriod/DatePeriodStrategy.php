@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Strategies;
+namespace App\Domain\Strategies\DatePeriod;
 
 use App\Domain\Entities\DatePeriod;
 use App\Domain\Entities\Project;

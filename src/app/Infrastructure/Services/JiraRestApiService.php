@@ -2,17 +2,16 @@
 
 namespace App\Infrastructure\Services;
 
-use App\Domain\Entities\DatePeriod;
-use App\Domain\Services\DatePeriodContext;
-use App\Domain\Strategies\ConfigDatePeriodStrategy;
-use App\Domain\Strategies\DevDatePeriodStrategy;
-use App\Domain\Strategies\QADatePeriodStrategy;
-use App\Domain\Strategies\QADevDatePeriodStrategy;
-use App\Infrastructure\Repositories\EloquentDatePeriodRepository;
-use GuzzleHttp\Client;
 use App\Domain\Entities\Project;
+use App\Domain\Services\DatePeriod\DatePeriodContext;
+use App\Domain\Strategies\DatePeriod\ConfigDatePeriodStrategy;
+use App\Domain\Strategies\DatePeriod\DevDatePeriodStrategy;
+use App\Domain\Strategies\DatePeriod\QADatePeriodStrategy;
+use App\Domain\Strategies\DatePeriod\QADevDatePeriodStrategy;
+use App\Infrastructure\Repositories\EloquentDatePeriodRepository;
 use App\Infrastructure\Repositories\EloquentProjectRepository;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 
 class JiraRestApiService
 {

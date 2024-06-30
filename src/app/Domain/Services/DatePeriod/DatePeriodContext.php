@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Domain\Services;
+namespace App\Domain\Services\DatePeriod;
 
 use App\Domain\Entities\DatePeriod;
 use App\Domain\Entities\Project;
-use App\Domain\Strategies\DatePeriodStrategy;
+use App\Domain\Strategies\DatePeriod\DatePeriodStrategy;
 
 class DatePeriodContext
 {
