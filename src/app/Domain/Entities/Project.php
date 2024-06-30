@@ -9,7 +9,7 @@ readonly class Project
         private readonly string $name,
         private readonly string $buildStatus,
         private readonly string $ragStatus,
-        private readonly array $datePeriods
+        private readonly array $datePeriods = []
     ) {}
 
     public function getId(): string

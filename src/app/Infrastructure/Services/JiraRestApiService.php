@@ -2,12 +2,17 @@
 
 namespace App\Infrastructure\Services;
 
-use App\Domain\Entities\DatePeriod;
-use App\Infrastructure\Repositories\EloquentDatePeriodRepository;
-use GuzzleHttp\Client;
 use App\Domain\Entities\Project;
+use App\Domain\Services\DatePeriod\DatePeriodContext;
+use App\Domain\Strategies\DatePeriod\ConfigDatePeriodStrategy;
+use App\Domain\Strategies\DatePeriod\ContentDatePeriodStrategy;
+use App\Domain\Strategies\DatePeriod\DevDatePeriodStrategy;
+use App\Domain\Strategies\DatePeriod\QADatePeriodStrategy;
+use App\Domain\Strategies\DatePeriod\QADevDatePeriodStrategy;
+use App\Infrastructure\Repositories\EloquentDatePeriodRepository;
 use App\Infrastructure\Repositories\EloquentProjectRepository;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 
 class JiraRestApiService
 {
@@ -15,17 +20,31 @@ class JiraRestApiService
     protected $config;
     protected $projectRepository;
     protected $datePeriodRepository;
+    private DatePeriodContext $datePeriodContext;
 
     public function __construct(
         Client $client,
         EloquentProjectRepository $projectRepository,
         EloquentDatePeriodRepository $datePeriodRepository,
+        DatePeriodContext $datePeriodContext
     )
     {
         $this->client = $client;
         $this->config = config('jira');
         $this->projectRepository = $projectRepository;
         $this->datePeriodRepository = $datePeriodRepository;
+        $this->datePeriodContext = $datePeriodContext;
+
+        $this->initializeStrategies();
+    }
+
+    protected function initializeStrategies()
+    {
+        $this->datePeriodContext->addStrategy(new ConfigDatePeriodStrategy());
+        $this->datePeriodContext->addStrategy(new DevDatePeriodStrategy());
+        $this->datePeriodContext->addStrategy(new QADatePeriodStrategy());
+        $this->datePeriodContext->addStrategy(new QADevDatePeriodStrategy());
+        $this->datePeriodContext->addStrategy(new ContentDatePeriodStrategy());
     }
 
     public function getEpics()
@@ -39,7 +58,7 @@ class JiraRestApiService
         $response = $this->client->get($this->config['endpoints']['rest'] . '/search', [
             'query' => [
                 'jql' => $jql,
-                'fields' => 'id,key,summary,customfield_10015,customfield_10098,customfield_10152,customfield_10166,status',
+                'fields' => 'id,key,summary,customfield_10015,customfield_10098,customfield_10099,customfield_10152,customfield_10155,customfield_10166,status',
                 'maxResults' => 300
             ],
             'auth' => [$this->config['auth']['username'], $this->config['auth']['apiToken']]
@@ -64,38 +83,10 @@ class JiraRestApiService
 
             $this->projectRepository->save($project);
 
-            // Create Date Periods
-            $startDate = $epic['fields']['customfield_10015'];
-            $qaDueDate = $epic['fields']['customfield_10098'];
-            $developerId = $epic['fields']['customfield_10152']['accountId'] ?? 'unassigned-developer';
-
-            // Config Date Period
-            $configStartDate = Carbon::parse($startDate)->addDay()->format('Y-m-d');
-            $configEndDate = Carbon::parse($configStartDate)->format('Y-m-d');
-
-            $configPeriod = new DatePeriod(
-                uniqid(),
-                $project->getId(),
-                '63fca0987655a3223a217054', // Hardcoded config assignee ID
-                $configStartDate,
-                $configEndDate
-            );
-
-            $this->datePeriodRepository->save($configPeriod);
-
-            // Development Date Period
-            $devStartDate = Carbon::parse($startDate)->addDay()->format('Y-m-d');
-            $devEndDate = Carbon::parse($qaDueDate)->format('Y-m-d');
-
-            $devPeriod = new DatePeriod(
-                uniqid(),
-                $project->getId(),
-                $developerId,
-                $devStartDate,
-                $devEndDate
-            );
-
-            $this->datePeriodRepository->save($devPeriod);
+            $datePeriods = $this->datePeriodContext->createDatePeriods($project, $epic);
+            foreach ($datePeriods as $datePeriod) {
+                $this->datePeriodRepository->save($datePeriod);
+            }
         }
     }
 }
