@@ -59,7 +59,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 /* Add some basic styling */
 body {
     font-family: 'Arial', sans-serif;

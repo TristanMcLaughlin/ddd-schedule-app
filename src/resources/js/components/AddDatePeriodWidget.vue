@@ -8,7 +8,7 @@
         </td>
         <td colspan="2">
         </td>
-        <td v-for="date in dateRange" :key="date" class="new-period-cell" :class="getCellClass(date)"
+        <td v-for="date in dateRange" :key="date" class="new-period" :class="getCellClass(date)"
             @mousedown="startDateSelection(date)"
             @mouseup="endDateSelection(date)"
             @mouseover="highlightDateSelection(date)"></td>
@@ -56,7 +56,7 @@ export default {
         },
         getCellClass(date) {
             if (this.isDateInNewPeriodRange(date)) {
-                return 'highlighted-new-period';
+                return 'new-period--highlighted';
             }
             return '';
         },
@@ -82,13 +82,13 @@ export default {
 };
 </script>
 
-<style scoped>
+<style  lang="scss" scoped>
     /* Add some basic styling */
-    .new-period-cell {
+    .new-period {
         background-color: #FFFFE0; /* Light yellow for new period selection */
-    }
 
-    .highlighted-new-period {
-        background-color: #FFD700; /* Darker yellow for currently highlighted period */
+        &--highlighted {
+            background-color: #FFD700; /* Darker yellow for currently highlighted period */
+        }
     }
 </style>
