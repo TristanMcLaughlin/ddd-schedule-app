@@ -10,6 +10,7 @@ abstract class BaseDatePeriodStrategy implements DatePeriodStrategy
     protected $assignee;
     protected $startDate;
     protected $endDate;
+    protected $importedFromJira = true;
 
     public function getDatePeriod(): ?DatePeriod
     {
@@ -22,7 +23,8 @@ abstract class BaseDatePeriodStrategy implements DatePeriodStrategy
             $this->project->getId(),
             $this->assignee,
             $this->startDate,
-            $this->endDate
+            $this->endDate,
+            $this->importedFromJira
         );
     }
 

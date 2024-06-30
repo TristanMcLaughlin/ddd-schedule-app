@@ -29,7 +29,7 @@ class EloquentProjectRepository implements ProjectRepository
             ]
         );
 
-        $projectModel->datePeriods()->delete();
+        $projectModel->datePeriods()->where('imported_from_jira', true)->delete();
     }
 
     public function allProjectsWithDatePeriods()

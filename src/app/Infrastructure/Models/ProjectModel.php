@@ -29,7 +29,8 @@ class ProjectModel extends Model
                 $datePeriodModel->project_id,
                 $datePeriodModel->assignee_id,
                 $datePeriodModel->start_date,
-                $datePeriodModel->end_date
+                $datePeriodModel->end_date,
+                $datePeriodModel->imported_from_jira
             );
         })->all();
 
