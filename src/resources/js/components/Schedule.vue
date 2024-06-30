@@ -15,12 +15,16 @@
                 <th>RAG</th>
                 <th>Status</th>
                 <th v-for="date in dateRange" :key="date" class="rotated"><span>{{ date }}</span></th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
             <template v-for="assignee in assignees" :key="assignee.id">
                 <tr>
                     <td>{{ assignee.name }}</td>
+                    <td colspan="4">
+                        <button @click="toggleAddPeriod(assignee.id)">+</button>
+                    </td>
                 </tr>
                 <tr v-for="project in getFilteredProjectsForAssignee(assignee.id)" :key="project.id">
                     <td></td>
@@ -28,6 +32,23 @@
                     <td>{{ project.rag_status }}</td>
                     <td>{{ project.build_status }}</td>
                     <td v-for="date in dateRange" :key="date" :class="{'highlighted': isDateInRange(date, project.date_periods, assignee.id)}"></td>
+                </tr>
+                <tr v-if="isAddingPeriod(assignee.id)">
+                    <td></td>
+                    <td>
+                        <select v-model="newDatePeriod.projectId">
+                            <option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</option>
+                        </select>
+                    </td>
+                    <td colspan="2">
+                    </td>
+                    <td v-for="date in dateRange" :key="date" class="new-period-cell" :class="{'new-period-cell-highlighted': isDateInNewPeriodRange(date)}"
+                        @mousedown="startDateSelection(date)"
+                        @mouseup="endDateSelection(date)"
+                        @mouseover="highlightDateSelection(date)"></td>
+                    <td>
+                        <button @click="saveDatePeriod(assignee.id)">Save</button>
+                    </td>
                 </tr>
             </template>
             </tbody>
@@ -46,7 +67,14 @@ export default {
             assignees: [],
             dateRange: this.generateDateRange(),
             selectedProject: '',
-            unavailableStatuses: ['abandoned', 'ended']
+            unavailableStatuses: ['abandoned', 'ended'],
+            addingPeriod: null,
+            newDatePeriod: {
+                projectId: '',
+                startDate: '',
+                endDate: '',
+            },
+            selecting: false,
         };
     },
     created() {
@@ -96,6 +124,52 @@ export default {
                 (this.selectedProject === '' || project.name === this.selectedProject)
             );
         },
+        toggleAddPeriod(assigneeId) {
+            this.addingPeriod = this.addingPeriod === assigneeId ? null : assigneeId;
+            this.newDatePeriod = {
+                projectId: '',
+                startDate: '',
+                endDate: '',
+            };
+        },
+        isAddingPeriod(assigneeId) {
+            return this.addingPeriod === assigneeId;
+        },
+        startDateSelection(date) {
+            this.selecting = true;
+            this.newDatePeriod.startDate = date;
+            this.newDatePeriod.endDate = date;
+        },
+        endDateSelection(date) {
+            this.selecting = false;
+            this.newDatePeriod.endDate = date;
+        },
+        highlightDateSelection(date) {
+            if (this.selecting) {
+                this.newDatePeriod.endDate = date;
+            }
+        },
+        isDateInNewPeriodRange(date) {
+            if (!this.newDatePeriod.startDate || !this.newDatePeriod.endDate) return false;
+            const current = moment(date);
+            return current.isBetween(moment(this.newDatePeriod.startDate), moment(this.newDatePeriod.endDate), 'days', '[]');
+        },
+        async saveDatePeriod(assigneeId) {
+            try {
+                const payload = {
+                    assignee_id: assigneeId,
+                    project_id: this.newDatePeriod.projectId,
+                    start_date: this.newDatePeriod.startDate,
+                    end_date: this.newDatePeriod.endDate,
+                };
+                const response = await axios.post(`/api/projects/${payload.project_id}/date-periods`, payload);
+                console.log('Date period saved:', response.data);
+                this.fetchData();
+                this.toggleAddPeriod(assigneeId);
+            } catch (error) {
+                console.error('Error saving date period:', error.response.data);
+            }
+        },
     },
 };
 </script>
@@ -134,6 +208,14 @@ th {
 }
 
 .highlighted {
+    background-color: #4CAF50; /* Green background for highlighted cells */
+}
+
+.new-period-cell {
+    background-color: #FFFFE0; /* Light yellow for new period selection */
+}
+
+.new-period-cell-highlighted {
     background-color: #4CAF50; /* Green background for highlighted cells */
 }
 
