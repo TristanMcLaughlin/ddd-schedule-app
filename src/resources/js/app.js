@@ -1,7 +1,6 @@
 import './bootstrap';
-import '../css/app.css';
 
 import { createApp } from 'vue';
-import Schedule from './components/Schedule.vue';
+import ContainerComponent from "./components/ContainerComponent.vue";
 
-createApp(Schedule).mount('#app');
+createApp(ContainerComponent).mount('#app');

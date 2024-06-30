@@ -7,21 +7,32 @@
                 <option v-for="project in uniqueProjectNames" :key="project" :value="project">{{ project }}</option>
             </select>
         </div>
-        <table>
+        <table class="table">
             <thead>
             <tr>
                 <th>Assignee</th>
-                <th>Project Name</th>
+                <th class="project-name">Project Name</th>
                 <th>RAG</th>
-                <th>Status</th>
+                <th class="status">Status</th>
                 <th v-for="date in dateRange" :key="date" class="rotated"><span>{{ date }}</span></th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
             <template v-for="assignee in assignees" :key="assignee.id">
                 <tr>
-                    <td>{{ assignee.name }}</td>
+                    <td colspan="4" class="table__assignee">{{ assignee.name }}
+                        <button @click="toggleAddPeriod(assignee.id)" class="add-date-period__new">➕</button>
+                    </td>
                 </tr>
+                <AddDatePeriodWidget
+                    v-if="isAddingPeriod(assignee.id)"
+                    :projects="projects"
+                    :date-range="dateRange"
+                    :assignee-id="assignee.id"
+                    @save-date-period="handleSaveDatePeriod"
+                    @cancel-adding-period="cancelAddingPeriod"
+                />
                 <tr v-for="project in getFilteredProjectsForAssignee(assignee.id)" :key="project.id">
                     <td></td>
                     <td class="project-name">{{ project.name }}</td>
@@ -36,21 +47,20 @@
 </template>
 
 <script>
-import axios from 'axios';
 import moment from 'moment';
+import AddDatePeriodWidget from './AddDatePeriodWidget.vue';
 
 export default {
+    components: {
+        AddDatePeriodWidget,
+    },
+    props: ['projects', 'assignees', 'dateRange'],
     data() {
         return {
-            projects: [],
-            assignees: [],
-            dateRange: this.generateDateRange(),
             selectedProject: '',
-            unavailableStatuses: ['abandoned', 'ended']
+            unavailableStatuses: ['abandoned', 'ended'],
+            addingPeriod: null,
         };
-    },
-    created() {
-        this.fetchData();
     },
     computed: {
         uniqueProjectNames() {
@@ -59,23 +69,6 @@ export default {
         },
     },
     methods: {
-        async fetchData() {
-            const response = await axios.get('/api/projects');
-            this.projects = Object.values(response.data.projects);
-            this.assignees = Object.values(response.data.assignees);
-        },
-        generateDateRange() {
-            const start = moment();
-            const end = moment().add(30, 'days');
-            const range = [];
-
-            while (start.isBefore(end)) {
-                range.push(start.format('YYYY-MM-DD'));
-                start.add(1, 'day');
-            }
-
-            return range;
-        },
         isDateInRange(date, datePeriods, assigneeId) {
             const current = moment(date);
             return datePeriods.some(period =>
@@ -96,28 +89,44 @@ export default {
                 (this.selectedProject === '' || project.name === this.selectedProject)
             );
         },
+        toggleAddPeriod(assigneeId) {
+            this.addingPeriod = this.addingPeriod === assigneeId ? null : assigneeId;
+        },
+        isAddingPeriod(assigneeId) {
+            return this.addingPeriod === assigneeId;
+        },
+        cancelAddingPeriod() {
+          return this.addingPeriod = null;
+        },
+        handleSaveDatePeriod(payload) {
+            this.$emit('save-date-period', payload);
+            this.toggleAddPeriod(payload.assignee_id);
+        },
     },
 };
 </script>
 
-<style>
+<style lang="scss">
 /* Add some basic styling */
-body {
-    font-family: 'Arial', sans-serif;
-    font-size: 12px;
-}
-
-table {
+.table {
     width: 100%;
     border-collapse: collapse;
+
+    .project-name, .status {
+        min-width: 140px;
+    }
+
+    &__assignee {
+        text-align: left;
+    }
 }
 
 th, td {
     border: 1px solid #eee;
     padding: 0;
     text-align: center;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
 }
 
 th {
@@ -127,7 +136,6 @@ th {
 }
 
 .project-name {
-    max-width: 100px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -135,6 +143,14 @@ th {
 
 .highlighted {
     background-color: #4CAF50; /* Green background for highlighted cells */
+}
+
+.new-period-cell {
+    background-color: #FFFFE0; /* Light yellow for new period selection */
+}
+
+.highlighted-new-period {
+    background-color: #FFD700; /* Darker yellow for currently highlighted period */
 }
 
 .rotated {

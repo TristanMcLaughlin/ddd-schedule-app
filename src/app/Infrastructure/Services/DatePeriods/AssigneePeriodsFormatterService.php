@@ -20,7 +20,7 @@ class AssigneePeriodsFormatterService
 
     public function formatAssigneePeriods()
     {
-        $projects = $this->projectRepository->allProjectsWithDatePeriods();
+        $projects = $this->projectRepository->allFutureProjectsWithDatePeriods();
         $assignees = $this->assigneeRepository->all();
 
         $formattedData = [
