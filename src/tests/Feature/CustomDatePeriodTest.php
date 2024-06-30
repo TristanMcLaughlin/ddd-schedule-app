@@ -38,22 +38,28 @@ class CustomDatePeriodTest extends TestCase
             'end_date' => Carbon::now()->addDays(5)->format('Y-m-d'),
         ];
 
+        // Define the expected date period
+        $expectedDatePeriod = [
+            'project_id' => $project->id,
+            'assignee_id' => $assignee->id,
+            'start_date' => $payload['start_date'],
+            'end_date' => $payload['end_date'],
+            'imported_from_jira' => false,
+        ];
+
         // Perform the POST request
         $response = $this->postJson("/api/projects/{$project->id}/date-periods", $payload);
 
 
         // Assert validation passes and date period is inserted
         $response->assertStatus(201)
-            ->assertJson(['message' => 'Date period added successfully']);
+            ->assertJson([
+                'message' => 'Date period added successfully',
+                'date_period' => $expectedDatePeriod,
+            ]);
 
         // Assert the date period is in the database
-        $this->assertDatabaseHas('date_periods', [
-            'project_id' => $project->id,
-            'assignee_id' => $assignee->id,
-            'start_date' => $payload['start_date'],
-            'end_date' => $payload['end_date'],
-            'imported_from_jira' => false,
-        ]);
+        $this->assertDatabaseHas('date_periods', $expectedDatePeriod);
     }
 
     /** @test */

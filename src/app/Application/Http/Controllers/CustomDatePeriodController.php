@@ -44,6 +44,9 @@ class CustomDatePeriodController
 
         $this->datePeriodRepository->save($datePeriod);
 
-        return response()->json(['message' => 'Date period added successfully'], 201);
+        return response()->json([
+            'message' => 'Date period added successfully',
+            'date_period' => $datePeriod->toArray()
+        ], 201);
     }
 }
