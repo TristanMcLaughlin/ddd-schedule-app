@@ -7,13 +7,13 @@
                 <option v-for="project in uniqueProjectNames" :key="project" :value="project">{{ project }}</option>
             </select>
         </div>
-        <table>
+        <table class="table">
             <thead>
             <tr>
                 <th>Assignee</th>
-                <th>Project Name</th>
+                <th class="project-name">Project Name</th>
                 <th>RAG</th>
-                <th>Status</th>
+                <th class="status">Status</th>
                 <th v-for="date in dateRange" :key="date" class="rotated"><span>{{ date }}</span></th>
                 <th></th>
             </tr>
@@ -21,9 +21,8 @@
             <tbody>
             <template v-for="assignee in assignees" :key="assignee.id">
                 <tr>
-                    <td>{{ assignee.name }}</td>
-                    <td colspan="4">
-                        <button @click="toggleAddPeriod(assignee.id)">+</button>
+                    <td colspan="4" class="table__assignee">{{ assignee.name }}
+                        <button @click="toggleAddPeriod(assignee.id)" class="add-date-period__new">➕</button>
                     </td>
                 </tr>
                 <AddDatePeriodWidget
@@ -109,17 +108,25 @@ export default {
 
 <style lang="scss">
 /* Add some basic styling */
-table {
+.table {
     width: 100%;
     border-collapse: collapse;
+
+    .project-name, .status {
+        min-width: 140px;
+    }
+
+    &__assignee {
+        text-align: left;
+    }
 }
 
 th, td {
     border: 1px solid #eee;
     padding: 0;
     text-align: center;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
 }
 
 th {
@@ -129,7 +136,6 @@ th {
 }
 
 .project-name {
-    max-width: 100px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

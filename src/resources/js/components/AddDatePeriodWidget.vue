@@ -1,10 +1,15 @@
 <template>
-    <tr>
+    <tr class="add-date-period">
         <td></td>
         <td>
-            <select v-model="newDatePeriod.projectId">
-                <option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</option>
-            </select>
+            <v-select
+                :options="projects"
+                label="name"
+                :reduce="project => project.id"
+                v-model="newDatePeriod.projectId"
+                :filterable="true"
+                placeholder="Search for a project..."
+            />
         </td>
         <td colspan="2">
         </td>
@@ -13,14 +18,16 @@
             @mouseup="endDateSelection(date)"
             @mouseover="highlightDateSelection(date)"></td>
         <td>
-            <button @click="saveDatePeriod">Save</button>
-            <button @click="cancelDatePeriod">Cancel</button>
+            <button @click="saveDatePeriod" class="add-date-period__save">💾</button>
+            <button @click="cancelDatePeriod" class="add-date-period__cancel">❌</button>
         </td>
     </tr>
 </template>
 
 <script>
 import moment from 'moment';
+import vSelect from "vue-select";
+import 'vue-select/dist/vue-select.css';
 
 export default {
     props: ['projects', 'dateRange', 'assigneeId'],
@@ -79,16 +86,43 @@ export default {
             this.$emit('cancelAddingPeriod');
         },
     },
+    components: {
+        vSelect,
+    },
 };
 </script>
 
-<style  lang="scss" scoped>
+<style  lang="scss">
     /* Add some basic styling */
     .new-period {
         background-color: #FFFFE0; /* Light yellow for new period selection */
 
         &--highlighted {
             background-color: #FFD700; /* Darker yellow for currently highlighted period */
+        }
+    }
+
+    .add-date-period {
+        --vs-actions-padding: 0 3px;
+        --vs-font-size: 14px;
+        --vs-line-height: 1;
+
+        .vs__search, .vs__search:focus, .vs__selected {
+            margin-top: 0px;
+        }
+
+        .vs__dropdown-toggle {
+            padding: 0px;
+        }
+
+        &__save, &__cancel, &__new {
+            background: none;
+            border: 0;
+            outline: 0;
+            padding: 0 5px;
+            font-size: 14px;
+            height: 20px;
+            line-height: 20px;
         }
     }
 </style>
