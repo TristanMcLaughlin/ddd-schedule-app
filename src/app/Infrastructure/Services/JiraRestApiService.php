@@ -3,6 +3,11 @@
 namespace App\Infrastructure\Services;
 
 use App\Domain\Entities\DatePeriod;
+use App\Domain\Services\DatePeriodContext;
+use App\Domain\Strategies\ConfigDatePeriodStrategy;
+use App\Domain\Strategies\DevDatePeriodStrategy;
+use App\Domain\Strategies\QADatePeriodStrategy;
+use App\Domain\Strategies\QADevDatePeriodStrategy;
 use App\Infrastructure\Repositories\EloquentDatePeriodRepository;
 use GuzzleHttp\Client;
 use App\Domain\Entities\Project;
@@ -15,17 +20,30 @@ class JiraRestApiService
     protected $config;
     protected $projectRepository;
     protected $datePeriodRepository;
+    private DatePeriodContext $datePeriodContext;
 
     public function __construct(
         Client $client,
         EloquentProjectRepository $projectRepository,
         EloquentDatePeriodRepository $datePeriodRepository,
+        DatePeriodContext $datePeriodContext
     )
     {
         $this->client = $client;
         $this->config = config('jira');
         $this->projectRepository = $projectRepository;
         $this->datePeriodRepository = $datePeriodRepository;
+        $this->datePeriodContext = $datePeriodContext;
+
+        $this->initializeStrategies();
+    }
+
+    protected function initializeStrategies()
+    {
+        $this->datePeriodContext->addStrategy(new ConfigDatePeriodStrategy());
+        $this->datePeriodContext->addStrategy(new DevDatePeriodStrategy());
+        $this->datePeriodContext->addStrategy(new QADatePeriodStrategy());
+        $this->datePeriodContext->addStrategy(new QADevDatePeriodStrategy());
     }
 
     public function getEpics()
@@ -64,68 +82,10 @@ class JiraRestApiService
 
             $this->projectRepository->save($project);
 
-            // Create Date Periods
-            $startDate = $epic['fields']['customfield_10015'];
-            $qaDueDate = $epic['fields']['customfield_10098'];
-            $pmDueDate = $epic['fields']['customfield_10099'] ?? null;
-
-            $developerId = $epic['fields']['customfield_10152']['accountId'] ?? 'unassigned-developer';
-
-            // Config Date Period
-            $configStartDate = Carbon::parse($startDate)->addDay()->format('Y-m-d');
-            $configEndDate = Carbon::parse($configStartDate)->format('Y-m-d');
-
-            $configPeriod = new DatePeriod(
-                uniqid(),
-                $project->getId(),
-                '63fca0987655a3223a217054', // Hardcoded config assignee ID
-                $configStartDate,
-                $configEndDate
-            );
-
-            $this->datePeriodRepository->save($configPeriod);
-
-            // Development Date Period
-            $devStartDate = Carbon::parse($startDate)->addDay()->format('Y-m-d');
-            $devEndDate = Carbon::parse($qaDueDate)->format('Y-m-d');
-
-            $devPeriod = new DatePeriod(
-                uniqid(),
-                $project->getId(),
-                $developerId,
-                $devStartDate,
-                $devEndDate
-            );
-
-            $this->datePeriodRepository->save($devPeriod);
-
-            // QA Date Period
-            $qaStartDate = Carbon::parse($qaDueDate)->addDay()->format('Y-m-d');
-            $qaEndDate = $pmDueDate ? Carbon::parse($pmDueDate)->format('Y-m-d') : Carbon::parse($qaStartDate)->addDay()->format('Y-m-d');
-
-            $qaPeriod = new DatePeriod(
-                uniqid(),
-                $project->getId(),
-                '604f1df4311e270068ab9075', // Hardcoded QA assignee ID
-                $qaStartDate,
-                $qaEndDate
-            );
-
-            $this->datePeriodRepository->save($qaPeriod);
-
-            // Second dev period
-            $additionalDevStartDate = Carbon::parse($pmDueDate)->subDays(3)->format('Y-m-d');
-            $additionalDevEndDate = Carbon::parse($pmDueDate)->subDay()->format('Y-m-d');
-
-            $additionalDevPeriod = new DatePeriod(
-                uniqid(),
-                $project->getId(),
-                $developerId,
-                $additionalDevStartDate,
-                $additionalDevEndDate
-            );
-
-            $this->datePeriodRepository->save($additionalDevPeriod);
+            $datePeriods = $this->datePeriodContext->createDatePeriods($project, $epic);
+            foreach ($datePeriods as $datePeriod) {
+                $this->datePeriodRepository->save($datePeriod);
+            }
         }
     }
 }
