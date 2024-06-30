@@ -5,6 +5,7 @@ namespace App\Infrastructure\Repositories;
 use App\Domain\Entities\Project;
 use App\Domain\Repositories\ProjectRepository;
 use App\Infrastructure\Models\ProjectModel;
+use Carbon\Carbon;
 
 class EloquentProjectRepository implements ProjectRepository
 {
@@ -32,10 +33,12 @@ class EloquentProjectRepository implements ProjectRepository
         $projectModel->datePeriods()->where('imported_from_jira', true)->delete();
     }
 
-    public function allProjectsWithDatePeriods()
+    public function allFutureProjectsWithDatePeriods()
     {
-        return ProjectModel::with('datePeriods')
-            ->get()
-            ->map->toDomainEntity();
+        return ProjectModel::where('build_status', '!=', 'Abandoned')
+        ->whereHas('datePeriods', function ($query) {
+            $query->where('end_date', '>', Carbon::today());
+        })
+            ->with('datePeriods')->get()->map->toDomainEntity();
     }
 }
