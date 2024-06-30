@@ -26,13 +26,6 @@
                         <button @click="toggleAddPeriod(assignee.id)">+</button>
                     </td>
                 </tr>
-                <tr v-for="project in getFilteredProjectsForAssignee(assignee.id)" :key="project.id">
-                    <td></td>
-                    <td class="project-name">{{ project.name }}</td>
-                    <td>{{ project.rag_status }}</td>
-                    <td>{{ project.build_status }}</td>
-                    <td v-for="date in dateRange" :key="date" :class="{'highlighted': isDateInRange(date, project.date_periods, assignee.id)}"></td>
-                </tr>
                 <AddDatePeriodWidget
                     v-if="isAddingPeriod(assignee.id)"
                     :projects="projects"
@@ -41,6 +34,13 @@
                     @save-date-period="handleSaveDatePeriod"
                     @cancel-adding-period="cancelAddingPeriod"
                 />
+                <tr v-for="project in getFilteredProjectsForAssignee(assignee.id)" :key="project.id">
+                    <td></td>
+                    <td class="project-name">{{ project.name }}</td>
+                    <td>{{ project.rag_status }}</td>
+                    <td>{{ project.build_status }}</td>
+                    <td v-for="date in dateRange" :key="date" :class="{'highlighted': isDateInRange(date, project.date_periods, assignee.id)}"></td>
+                </tr>
             </template>
             </tbody>
         </table>
