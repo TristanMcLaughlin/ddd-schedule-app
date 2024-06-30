@@ -39,7 +39,7 @@ class JiraRestApiService
         $response = $this->client->get($this->config['endpoints']['rest'] . '/search', [
             'query' => [
                 'jql' => $jql,
-                'fields' => 'id,key,summary,customfield_10015,customfield_10098,customfield_10152,customfield_10166,status',
+                'fields' => 'id,key,summary,customfield_10015,customfield_10098,customfield_10099,customfield_10152,customfield_10166,status',
                 'maxResults' => 300
             ],
             'auth' => [$this->config['auth']['username'], $this->config['auth']['apiToken']]
@@ -67,6 +67,8 @@ class JiraRestApiService
             // Create Date Periods
             $startDate = $epic['fields']['customfield_10015'];
             $qaDueDate = $epic['fields']['customfield_10098'];
+            $pmDueDate = $epic['fields']['customfield_10099'] ?? null;
+
             $developerId = $epic['fields']['customfield_10152']['accountId'] ?? 'unassigned-developer';
 
             // Config Date Period
@@ -96,6 +98,34 @@ class JiraRestApiService
             );
 
             $this->datePeriodRepository->save($devPeriod);
+
+            // QA Date Period
+            $qaStartDate = Carbon::parse($qaDueDate)->addDay()->format('Y-m-d');
+            $qaEndDate = $pmDueDate ? Carbon::parse($pmDueDate)->format('Y-m-d') : Carbon::parse($qaStartDate)->addDay()->format('Y-m-d');
+
+            $qaPeriod = new DatePeriod(
+                uniqid(),
+                $project->getId(),
+                '604f1df4311e270068ab9075', // Hardcoded QA assignee ID
+                $qaStartDate,
+                $qaEndDate
+            );
+
+            $this->datePeriodRepository->save($qaPeriod);
+
+            // Second dev period
+            $additionalDevStartDate = Carbon::parse($pmDueDate)->subDays(3)->format('Y-m-d');
+            $additionalDevEndDate = Carbon::parse($pmDueDate)->subDay()->format('Y-m-d');
+
+            $additionalDevPeriod = new DatePeriod(
+                uniqid(),
+                $project->getId(),
+                $developerId,
+                $additionalDevStartDate,
+                $additionalDevEndDate
+            );
+
+            $this->datePeriodRepository->save($additionalDevPeriod);
         }
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Application\Console\Commands\Jira;
 
 use Illuminate\Console\Command;
-use App\Infrastructure\Services\DatePeriods\DatePeriods\JiraGraphQLService;
+use App\Infrastructure\Services\JiraGraphQLService;
 
 class SyncTeamMembers extends Command
 {
