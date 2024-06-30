@@ -5,6 +5,7 @@ namespace App\Infrastructure\Services;
 use App\Domain\Entities\Project;
 use App\Domain\Services\DatePeriod\DatePeriodContext;
 use App\Domain\Strategies\DatePeriod\ConfigDatePeriodStrategy;
+use App\Domain\Strategies\DatePeriod\ContentDatePeriodStrategy;
 use App\Domain\Strategies\DatePeriod\DevDatePeriodStrategy;
 use App\Domain\Strategies\DatePeriod\QADatePeriodStrategy;
 use App\Domain\Strategies\DatePeriod\QADevDatePeriodStrategy;
@@ -43,6 +44,7 @@ class JiraRestApiService
         $this->datePeriodContext->addStrategy(new DevDatePeriodStrategy());
         $this->datePeriodContext->addStrategy(new QADatePeriodStrategy());
         $this->datePeriodContext->addStrategy(new QADevDatePeriodStrategy());
+        $this->datePeriodContext->addStrategy(new ContentDatePeriodStrategy());
     }
 
     public function getEpics()
@@ -56,7 +58,7 @@ class JiraRestApiService
         $response = $this->client->get($this->config['endpoints']['rest'] . '/search', [
             'query' => [
                 'jql' => $jql,
-                'fields' => 'id,key,summary,customfield_10015,customfield_10098,customfield_10099,customfield_10152,customfield_10166,status',
+                'fields' => 'id,key,summary,customfield_10015,customfield_10098,customfield_10099,customfield_10152,customfield_10155,customfield_10166,status',
                 'maxResults' => 300
             ],
             'auth' => [$this->config['auth']['username'], $this->config['auth']['apiToken']]
