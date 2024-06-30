@@ -33,23 +33,14 @@
                     <td>{{ project.build_status }}</td>
                     <td v-for="date in dateRange" :key="date" :class="{'highlighted': isDateInRange(date, project.date_periods, assignee.id)}"></td>
                 </tr>
-                <tr v-if="isAddingPeriod(assignee.id)">
-                    <td></td>
-                    <td>
-                        <select v-model="newDatePeriod.projectId">
-                            <option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</option>
-                        </select>
-                    </td>
-                    <td colspan="2">
-                    </td>
-                    <td v-for="date in dateRange" :key="date" class="new-period-cell" :class="{'new-period-cell-highlighted': isDateInNewPeriodRange(date)}"
-                        @mousedown="startDateSelection(date)"
-                        @mouseup="endDateSelection(date)"
-                        @mouseover="highlightDateSelection(date)"></td>
-                    <td>
-                        <button @click="saveDatePeriod(assignee.id)">Save</button>
-                    </td>
-                </tr>
+                <AddDatePeriodWidget
+                    v-if="isAddingPeriod(assignee.id)"
+                    :projects="projects"
+                    :date-range="dateRange"
+                    :assignee-id="assignee.id"
+                    @save-date-period="handleSaveDatePeriod"
+                    @cancel-adding-period="cancelAddingPeriod"
+                />
             </template>
             </tbody>
         </table>
@@ -57,28 +48,20 @@
 </template>
 
 <script>
-import axios from 'axios';
 import moment from 'moment';
+import AddDatePeriodWidget from './AddDatePeriodWidget.vue';
 
 export default {
+    components: {
+        AddDatePeriodWidget,
+    },
+    props: ['projects', 'assignees', 'dateRange'],
     data() {
         return {
-            projects: [],
-            assignees: [],
-            dateRange: this.generateDateRange(),
             selectedProject: '',
             unavailableStatuses: ['abandoned', 'ended'],
             addingPeriod: null,
-            newDatePeriod: {
-                projectId: '',
-                startDate: '',
-                endDate: '',
-            },
-            selecting: false,
         };
-    },
-    created() {
-        this.fetchData();
     },
     computed: {
         uniqueProjectNames() {
@@ -87,23 +70,6 @@ export default {
         },
     },
     methods: {
-        async fetchData() {
-            const response = await axios.get('/api/projects');
-            this.projects = Object.values(response.data.projects);
-            this.assignees = Object.values(response.data.assignees);
-        },
-        generateDateRange() {
-            const start = moment();
-            const end = moment().add(30, 'days');
-            const range = [];
-
-            while (start.isBefore(end)) {
-                range.push(start.format('YYYY-MM-DD'));
-                start.add(1, 'day');
-            }
-
-            return range;
-        },
         isDateInRange(date, datePeriods, assigneeId) {
             const current = moment(date);
             return datePeriods.some(period =>
@@ -126,49 +92,16 @@ export default {
         },
         toggleAddPeriod(assigneeId) {
             this.addingPeriod = this.addingPeriod === assigneeId ? null : assigneeId;
-            this.newDatePeriod = {
-                projectId: '',
-                startDate: '',
-                endDate: '',
-            };
         },
         isAddingPeriod(assigneeId) {
             return this.addingPeriod === assigneeId;
         },
-        startDateSelection(date) {
-            this.selecting = true;
-            this.newDatePeriod.startDate = date;
-            this.newDatePeriod.endDate = date;
+        cancelAddingPeriod() {
+          return this.addingPeriod = null;
         },
-        endDateSelection(date) {
-            this.selecting = false;
-            this.newDatePeriod.endDate = date;
-        },
-        highlightDateSelection(date) {
-            if (this.selecting) {
-                this.newDatePeriod.endDate = date;
-            }
-        },
-        isDateInNewPeriodRange(date) {
-            if (!this.newDatePeriod.startDate || !this.newDatePeriod.endDate) return false;
-            const current = moment(date);
-            return current.isBetween(moment(this.newDatePeriod.startDate), moment(this.newDatePeriod.endDate), 'days', '[]');
-        },
-        async saveDatePeriod(assigneeId) {
-            try {
-                const payload = {
-                    assignee_id: assigneeId,
-                    project_id: this.newDatePeriod.projectId,
-                    start_date: this.newDatePeriod.startDate,
-                    end_date: this.newDatePeriod.endDate,
-                };
-                const response = await axios.post(`/api/projects/${payload.project_id}/date-periods`, payload);
-                console.log('Date period saved:', response.data);
-                this.fetchData();
-                this.toggleAddPeriod(assigneeId);
-            } catch (error) {
-                console.error('Error saving date period:', error.response.data);
-            }
+        handleSaveDatePeriod(payload) {
+            this.$emit('save-date-period', payload);
+            this.toggleAddPeriod(payload.assignee_id);
         },
     },
 };
@@ -176,11 +109,6 @@ export default {
 
 <style>
 /* Add some basic styling */
-body {
-    font-family: 'Arial', sans-serif;
-    font-size: 12px;
-}
-
 table {
     width: 100%;
     border-collapse: collapse;
@@ -215,8 +143,8 @@ th {
     background-color: #FFFFE0; /* Light yellow for new period selection */
 }
 
-.new-period-cell-highlighted {
-    background-color: #4CAF50; /* Green background for highlighted cells */
+.highlighted-new-period {
+    background-color: #FFD700; /* Darker yellow for currently highlighted period */
 }
 
 .rotated {
