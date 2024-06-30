@@ -2,7 +2,9 @@
 
 namespace App\Domain\Entities;
 
-readonly class DatePeriod
+use Illuminate\Contracts\Support\Arrayable;
+
+readonly class DatePeriod implements Arrayable
 {
     public function __construct(
         private string $id,
@@ -41,5 +43,17 @@ readonly class DatePeriod
     public function isImportedFromJira(): bool
     {
         return $this->importedFromJira;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'project_id' => $this->getProjectId(),
+            'assignee_id' => $this->getAssigneeId(),
+            'start_date' => $this->getStartDate(),
+            'end_date' => $this->getEndDate(),
+            'imported_from_jira' => $this->isImportedFromJira(),
+        ];
     }
 }

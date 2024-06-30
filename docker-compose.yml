@@ -8,20 +8,6 @@ services:
     working_dir: /opt/src
     volumes:
       - ./src:/opt/src
-    environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
-      - DB_CONNECTION=mysql
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_DATABASE=laravel
-      - DB_USERNAME=root
-      - DB_PASSWORD=root
-      - REDIS_HOST=redis
-      - REDIS_PASSWORD=null
-      - REDIS_PORT=6379
-    env_file:
-      - ./src/.env
     networks:
       - app-network
 
@@ -52,6 +38,20 @@ services:
     networks:
       - app-network
 
+  test_db:
+    image: mysql:8.0
+    container_name: ddd-schedule-app-test-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: test_laravel
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - test_dbdata:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    networks:
+      - app-network
+
   redis:
     image: redis:7.2
     container_name: ddd-schedule-app-redis
@@ -67,3 +67,4 @@ networks:
 
 volumes:
   dbdata:
+  test_dbdata:
