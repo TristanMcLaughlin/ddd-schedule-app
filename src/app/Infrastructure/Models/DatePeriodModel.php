@@ -12,7 +12,7 @@ class DatePeriodModel extends Model
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
-    protected $fillable = ['id', 'project_id', 'assignee_id', 'start_date', 'end_date'];
+    protected $fillable = ['id', 'project_id', 'assignee_id', 'start_date', 'end_date', 'imported_from_jira'];
 
     public function project()
     {

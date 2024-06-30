@@ -21,15 +21,11 @@ class CustomDatePeriodController
 
     public function store(Request $request, $projectId)
     {
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'assignee_id' => 'required|string|exists:assignees,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
 
         $project = $this->projectRepository->findById($projectId);
 
