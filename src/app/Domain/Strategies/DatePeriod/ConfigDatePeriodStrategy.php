@@ -12,6 +12,10 @@ class ConfigDatePeriodStrategy extends BaseDatePeriodStrategy
     {
         $startDate = $epic['fields']['customfield_10015'];
 
+        if (!$startDate) {
+            return null;
+        }
+
         $this->project = $project;
         $this->assignee = '63fca0987655a3223a217054'; // Hardcoded config assignee ID
         $this->startDate = Carbon::parse($startDate)->addDay()->format('Y-m-d');

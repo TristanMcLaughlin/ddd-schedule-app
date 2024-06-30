@@ -13,6 +13,10 @@ class QADevDatePeriodStrategy extends BaseDatePeriodStrategy
         $pmDueDate = $epic['fields']['customfield_10099'] ?? Carbon::parse($epic['fields']['customfield_10098'])->addDays(3)->format('Y-m-d');
         $developerId = $epic['fields']['customfield_10152']['accountId'] ?? 'unassigned-developer';
 
+        if (!$pmDueDate) {
+            return null;
+        }
+
         $this->project = $project;
         $this->assignee = $developerId;
         $this->startDate = Carbon::parse($pmDueDate)->subDays(3)->format('Y-m-d');

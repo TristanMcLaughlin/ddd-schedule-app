@@ -11,6 +11,11 @@ class ContentDatePeriodStrategy extends BaseDatePeriodStrategy
     public function createDatePeriod(Project $project, array $epic): ?DatePeriod
     {
         $startDate = $epic['fields']['customfield_10155'];
+
+        if (!$startDate) {
+            return null;
+        }
+
         $this->project = $project;
 
         // Sophie if SAM
