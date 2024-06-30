@@ -9,7 +9,8 @@ readonly class DatePeriod
         private string $projectId,
         private string $assigneeId,
         private string $startDate,
-        private string $endDate
+        private string $endDate,
+        private bool $importedFromJira
     ) {}
 
     public function getId(): string
@@ -35,5 +36,10 @@ readonly class DatePeriod
     public function getEndDate(): string
     {
         return $this->endDate;
+    }
+
+    public function isImportedFromJira(): bool
+    {
+        return $this->importedFromJira;
     }
 }

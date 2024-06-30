@@ -31,7 +31,8 @@ class DatePeriodModel extends Model
             $this->project_id,
             $this->assignee_id,
             $this->start_date,
-            $this->end_date
+            $this->end_date,
+            $this->imported_from_jira
         );
     }
 }
