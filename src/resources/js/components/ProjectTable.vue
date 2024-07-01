@@ -7,7 +7,8 @@
                 <option v-for="project in uniqueProjectNames" :key="project" :value="project">{{ project }}</option>
             </select>
         </div>
-        <div  v-for="team in teams"><h2>{{team.name}}</h2>
+
+        <div>
             <table class="table">
                 <thead>
                 <tr>
@@ -16,10 +17,10 @@
                     <th>RAG</th>
                     <th class="status">Status</th>
                     <th v-for="date in dateRange" :key="date" class="rotated"><span>{{ date }}</span></th>
-                    <th></th>
                 </tr>
                 </thead>
-                <tbody>
+                <tbody v-for="team in teams">
+                <tr><td colspan="4"><h2>{{team.name}}</h2></td></tr>
                 <template v-for="assignee in team.assignees" :key="assignee.id">
                     <tr>
                         <td colspan="4" class="table__assignee">{{ assignee.name }}
@@ -38,7 +39,7 @@
                         <td></td>
                         <td class="project-name">{{ project.name }}</td>
                         <td>{{ project.rag_status }}</td>
-                        <td>{{ project.build_status }}</td>
+                        <td class="status">{{ project.build_status }}</td>
                         <td v-for="date in dateRange" :key="date" :class="{'highlighted': isDateInRange(date, project.date_periods, assignee.id)}"></td>
                     </tr>
                 </template>
@@ -120,6 +121,11 @@ export default {
 
     &__assignee {
         text-align: left;
+    }
+
+    thead {
+        position: sticky;
+        top: 0;
     }
 }
 
