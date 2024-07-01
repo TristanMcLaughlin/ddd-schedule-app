@@ -7,42 +7,44 @@
                 <option v-for="project in uniqueProjectNames" :key="project" :value="project">{{ project }}</option>
             </select>
         </div>
-        <table class="table">
-            <thead>
-            <tr>
-                <th>Assignee</th>
-                <th class="project-name">Project Name</th>
-                <th>RAG</th>
-                <th class="status">Status</th>
-                <th v-for="date in dateRange" :key="date" class="rotated"><span>{{ date }}</span></th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            <template v-for="assignee in assignees" :key="assignee.id">
+        <div  v-for="team in teams"><h2>{{team.name}}</h2>
+            <table class="table">
+                <thead>
                 <tr>
-                    <td colspan="4" class="table__assignee">{{ assignee.name }}
-                        <button @click="toggleAddPeriod(assignee.id)" class="add-date-period__new">➕</button>
-                    </td>
+                    <th>Assignee</th>
+                    <th class="project-name">Project Name</th>
+                    <th>RAG</th>
+                    <th class="status">Status</th>
+                    <th v-for="date in dateRange" :key="date" class="rotated"><span>{{ date }}</span></th>
+                    <th></th>
                 </tr>
-                <AddDatePeriodWidget
-                    v-if="isAddingPeriod(assignee.id)"
-                    :projects="projects"
-                    :date-range="dateRange"
-                    :assignee-id="assignee.id"
-                    @save-date-period="handleSaveDatePeriod"
-                    @cancel-adding-period="cancelAddingPeriod"
-                />
-                <tr v-for="project in getFilteredProjectsForAssignee(assignee.id)" :key="project.id">
-                    <td></td>
-                    <td class="project-name">{{ project.name }}</td>
-                    <td>{{ project.rag_status }}</td>
-                    <td>{{ project.build_status }}</td>
-                    <td v-for="date in dateRange" :key="date" :class="{'highlighted': isDateInRange(date, project.date_periods, assignee.id)}"></td>
-                </tr>
-            </template>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                <template v-for="assignee in team.assignees" :key="assignee.id">
+                    <tr>
+                        <td colspan="4" class="table__assignee">{{ assignee.name }}
+                            <button @click="toggleAddPeriod(assignee.id)" class="add-date-period__new">➕</button>
+                        </td>
+                    </tr>
+                    <AddDatePeriodWidget
+                        v-if="isAddingPeriod(assignee.id)"
+                        :projects="projects"
+                        :date-range="dateRange"
+                        :assignee-id="assignee.id"
+                        @save-date-period="handleSaveDatePeriod"
+                        @cancel-adding-period="cancelAddingPeriod"
+                    />
+                    <tr v-for="project in getFilteredProjectsForAssignee(assignee.id)" :key="project.id">
+                        <td></td>
+                        <td class="project-name">{{ project.name }}</td>
+                        <td>{{ project.rag_status }}</td>
+                        <td>{{ project.build_status }}</td>
+                        <td v-for="date in dateRange" :key="date" :class="{'highlighted': isDateInRange(date, project.date_periods, assignee.id)}"></td>
+                    </tr>
+                </template>
+                </tbody>
+            </table>
+        </div>
     </div>
 </template>
 
@@ -54,7 +56,7 @@ export default {
     components: {
         AddDatePeriodWidget,
     },
-    props: ['projects', 'assignees', 'dateRange'],
+    props: ['projects', 'teams', 'dateRange'],
     data() {
         return {
             selectedProject: '',

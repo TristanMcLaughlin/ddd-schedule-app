@@ -6,7 +6,8 @@ readonly class Team
 {
     public function __construct(
         private string $id,
-        private string $name
+        private string $name,
+        private array $assignees = []
     ) {}
 
     public function getId(): string
@@ -17,5 +18,13 @@ readonly class Team
     public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * @return Assignee[]
+     */
+    public function getAssignees(): array
+    {
+        return $this->assignees;
     }
 }

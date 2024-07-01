@@ -24,13 +24,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AssigneeRepository::class, EloquentAssigneeRepository::class);
         $this->app->bind(DatePeriodRepository::class, EloquentDatePeriodRepository::class);
         $this->app->bind(TeamRepository::class, EloquentTeamRepository::class);
-
-        $this->app->singleton(AssigneePeriodsFormatterService::class, function ($app) {
-            return new AssigneePeriodsFormatterService(
-                $app->make(EloquentAssigneeRepository::class),
-                $app->make(EloquentProjectRepository::class),
-            );
-        });
     }
 
     /**
