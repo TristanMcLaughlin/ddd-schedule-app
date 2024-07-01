@@ -17,4 +17,10 @@ class EloquentTeamRepository implements TeamRepository
             ]
         );
     }
+
+    public function all()
+    {
+        return TeamModel::with('assignees')->get()
+            ->map->toDomainEntity();
+    }
 }

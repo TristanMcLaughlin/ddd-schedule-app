@@ -6,5 +6,6 @@ use App\Domain\Entities\Team;
 
 interface TeamRepository
 {
-    public function save(Team $team);
+    public function save(Team $team): void;
+    public function all();
 }

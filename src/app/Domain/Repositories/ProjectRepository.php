@@ -8,4 +8,5 @@ interface ProjectRepository
 {
     public function findById(string $id): ?Project;
     public function save(Project $project): void;
+    public function allFutureProjectsWithDatePeriods();
 }

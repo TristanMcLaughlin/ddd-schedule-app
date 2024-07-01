@@ -2,44 +2,52 @@
 
 namespace App\Infrastructure\Services\DatePeriods;
 
+use App\Domain\Entities\Assignee;
+use App\Domain\Repositories\AssigneeRepository;
+use App\Domain\Repositories\ProjectRepository;
+use App\Domain\Repositories\TeamRepository;
 use App\Infrastructure\Repositories\EloquentAssigneeRepository;
 use App\Infrastructure\Repositories\EloquentProjectRepository;
 
 class AssigneePeriodsFormatterService
 {
-    protected $assigneeRepository;
+    protected $teamRespository;
     protected $projectRepository;
 
     public function __construct(
-        EloquentAssigneeRepository $assigneeRepository,
-        EloquentProjectRepository $projectRepository,
+        TeamRepository $teamRespository,
+        ProjectRepository $projectRepository,
     ) {
-        $this->assigneeRepository = $assigneeRepository;
+        $this->teamRespository = $teamRespository;
         $this->projectRepository = $projectRepository;
     }
 
     public function formatAssigneePeriods()
     {
         $projects = $this->projectRepository->allFutureProjectsWithDatePeriods();
-        $assignees = $this->assigneeRepository->all();
+        $teams = $this->teamRespository->all();
 
         $formattedData = [
             'projects' => [],
-            'assignees' => [],
+            'teams' => [],
         ];
 
         // Prepare assignees data
-        foreach ($assignees as $assignee) {
-            $formattedData['assignees'][$assignee->getId()] = [
-                'id' => $assignee->getId(),
-                'name' => $assignee->getName(),
+        foreach ($teams as $team) {
+            $formattedData['teams'][] = [
+                'id' => $team->getId(),
+                'name' => $team->getName(),
+                'assignees' => array_map(fn (Assignee $assignee) => [
+                    'id' => $assignee->getId(),
+                    'name' => $assignee->getName(),
+                ], $team->getAssignees()),
             ];
         }
 
         // Prepare projects and date periods data
         foreach ($projects as $project) {
             $projectId = $project->getId();
-            $formattedData['projects'][$projectId] = [
+            $formattedData['projects'][] = [
                 'id' => $projectId,
                 'name' => $project->getName(),
                 'build_status' => $project->getBuildStatus(),
