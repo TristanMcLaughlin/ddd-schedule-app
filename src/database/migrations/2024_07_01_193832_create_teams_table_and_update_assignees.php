@@ -9,13 +9,14 @@ return new class extends Migration
     public function up()
     {
         Schema::create('teams', function (Blueprint $table) {
-            $table->id();
+            $table->string('id')->unique()->primary(); // Use unique string as primary key
             $table->string('name')->unique();
             $table->timestamps();
         });
 
         Schema::table('assignees', function (Blueprint $table) {
-            $table->foreignId('team_id')->nullable()->constrained('teams')->onDelete('set null');
+            $table->string('team_id')->nullable();
+            $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
         });
     }
 
