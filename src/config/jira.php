@@ -9,6 +9,9 @@ return [
         'graphql' => env('JIRA_GRAPHQL_ENDPOINT'),
         'rest' => env('JIRA_REST_ENDPOINT'),
     ],
-    'team' => env('JIRA_TEAM_ID'),
+    'organisationId' => env('JIRA_ORG_ID'),
     'site' => env('JIRA_SITE_ID'),
+    'teams' => [
+        'QA','Content','Config','Developer','PM'
+    ],
 ];
