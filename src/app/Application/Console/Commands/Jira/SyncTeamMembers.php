@@ -2,8 +2,10 @@
 
 namespace App\Application\Console\Commands\Jira;
 
+use Database\Seeders\UnassignedDeveloperSeeder;
 use Illuminate\Console\Command;
 use App\Infrastructure\Services\JiraGraphQLService;
+use Illuminate\Support\Facades\Artisan;
 
 class SyncTeamMembers extends Command
 {
@@ -20,7 +22,8 @@ class SyncTeamMembers extends Command
 
     public function handle()
     {
-        $this->jiraGraphQLService->syncTeamMembers();
+        $this->jiraGraphQLService->syncTeams();
+        Artisan::call('db:seed', ['--class' => UnassignedDeveloperSeeder::class]);
         $this->info('Team members synchronized successfully.');
     }
 }

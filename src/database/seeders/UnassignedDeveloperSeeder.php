@@ -2,17 +2,20 @@
 
 namespace Database\Seeders;
 
+use App\Domain\Entities\Assignee;
+use App\Infrastructure\Repositories\EloquentAssigneeRepository;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class UnassignedDeveloperSeeder extends Seeder
 {
     public function run()
     {
-        DB::table('assignees')->insert([
-            'id' => 'unassigned-developer',
-            'name' => 'Unassigned Developer',
-            'role' => 'Web Developer',
-        ]);
+        $repository = new EloquentAssigneeRepository();
+        $repository->save(new Assignee(
+            'unassigned-developer',
+            'Unassigned Developer',
+            'Web Developer',
+            null
+        ));
     }
 }
