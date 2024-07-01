@@ -29,7 +29,8 @@ class AssigneeModel extends Model
         return new Assignee(
             $this->id,
             $this->name,
-            $this->role
+            $this->role,
+            $this->team_id
         );
     }
 }

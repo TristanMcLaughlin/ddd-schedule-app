@@ -7,7 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class TeamModel extends Model
 {
-    protected $fillable = ['name'];
+    protected $table = 'teams';
+    protected $primaryKey = 'id';
+    public $incrementing = false;
+
+    protected $fillable = ['id', 'name'];
 
     public function assignees()
     {

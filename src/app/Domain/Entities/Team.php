@@ -5,8 +5,8 @@ namespace App\Domain\Entities;
 readonly class Team
 {
     public function __construct(
-        private string  $id,
-        private string  $name
+        private string $id,
+        private string $name
     ) {}
 
     public function getId(): string

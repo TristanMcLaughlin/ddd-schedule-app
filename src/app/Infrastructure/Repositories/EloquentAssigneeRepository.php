@@ -25,6 +25,7 @@ class EloquentAssigneeRepository implements AssigneeRepository
             [
                 'name' => $assignee->getName(),
                 'role' => $assignee->getRole(),
+                'team_id' => $assignee->getTeamId(),
             ]
         );
     }

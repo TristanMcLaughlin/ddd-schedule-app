@@ -7,7 +7,8 @@ readonly class Assignee
     public function __construct(
         private string  $id,
         private string  $name,
-        private ?string $role
+        private ?string $role,
+        private ?string $teamId
     ) {}
 
     public function getId(): string
@@ -23,5 +24,10 @@ readonly class Assignee
     public function getRole(): ?string
     {
         return $this->role;
+    }
+
+    public function getTeamId(): ?string
+    {
+        return $this->teamId;
     }
 }
