@@ -12,11 +12,16 @@ class AssigneeModel extends Model
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
-    protected $fillable = ['id', 'name', 'role'];
+    protected $fillable = ['id', 'name', 'role', 'team_id'];
 
     public function datePeriods()
     {
         return $this->hasMany(DatePeriodModel::class, 'assignee_id');
+    }
+
+    public function team()
+    {
+        return $this->belongsTo(TeamModel::class);
     }
 
     public function toDomainEntity(): Assignee
