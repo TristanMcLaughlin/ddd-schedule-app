@@ -2,7 +2,7 @@
     <div class="container">
         <ProjectTable
             :projects="projectsWithJobCodeNames"
-            :assignees="assignees"
+            :teams="teams"
             :date-range="dateRange"
             @save-date-period="saveDatePeriod"
         />
@@ -21,7 +21,7 @@ export default {
     data() {
         return {
             projects: [],
-            assignees: [],
+            teams: [],
             dateRange: this.generateDateRange(),
         };
     },
@@ -37,7 +37,7 @@ export default {
         async fetchData() {
             const response = await axios.get('/api/projects');
             this.projects = Object.values(response.data.projects);
-            this.assignees = Object.values(response.data.assignees);
+            this.teams = Object.values(response.data.teams);
         },
         generateDateRange() {
             const start = moment();
