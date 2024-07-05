@@ -67,7 +67,7 @@ export default {
     components: {
         AddDatePeriodWidget,
     },
-    props: ['projects', 'teams', 'dateRange'],
+    props: ['projects', 'teams', 'dateRange', 'bankHolidays'],
     data() {
         return {
             selectedProject: '',
@@ -117,7 +117,8 @@ export default {
         },
         isDateAWeekend(date) {
             const current = moment(date);
-            return [6, 0].includes(current.day());
+            return [6, 0].includes(current.day()) ||
+                this.bankHolidays.includes(current.format('YYYY-MM-DD'));
         },
     },
 };
@@ -168,7 +169,7 @@ th {
 }
 
 .is-weekend {
-    background-color: #D3D3D3;
+    background-color: #D3D3D3 !important;
 }
 
 .new-period-cell {

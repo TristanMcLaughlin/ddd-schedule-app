@@ -4,6 +4,7 @@
             :projects="projectsWithJobCodeNames"
             :teams="teams"
             :date-range="dateRange"
+            :bank-holidays="bankHolidays"
             @save-date-period="saveDatePeriod"
         />
     </div>
@@ -22,6 +23,7 @@ export default {
         return {
             projects: [],
             teams: [],
+            bankHolidays: [],
             dateRange: this.generateDateRange(),
         };
     },
@@ -38,6 +40,9 @@ export default {
             const response = await axios.get('/api/projects');
             this.projects = Object.values(response.data.projects);
             this.teams = Object.values(response.data.teams);
+
+            const bankHolidays = await axios.get('/api/bank-holidays');
+            this.bankHolidays = bankHolidays.data.map(bh => bh.date);
         },
         generateDateRange() {
             const start = moment();
