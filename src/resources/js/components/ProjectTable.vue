@@ -42,7 +42,10 @@
                         <td><a :href="`https://opialtd.atlassian.net/browse/${project.id}`" target="_blank">{{ project.id }}</a></td>
                         <td>{{ project.rag_status }}</td>
                         <td class="status">{{ project.build_status }}</td>
-                        <td v-for="date in dateRange" :key="date" :class="{'highlighted': isDateInRange(date, project.date_periods, assignee.id)}"></td>
+                        <td v-for="date in dateRange" :key="date" :class="{
+                            'highlighted': isDateInRange(date, project.date_periods, assignee.id),
+                            'is-weekend': isDateAWeekend(date),
+                            }"></td>
                     </tr>
                 </template>
                 </tbody>
@@ -107,6 +110,10 @@ export default {
             this.$emit('save-date-period', payload);
             this.toggleAddPeriod(payload.assignee_id);
         },
+        isDateAWeekend(date) {
+            const current = moment(date);
+            return [6, 0].includes(current.day());
+        },
     },
 };
 </script>
@@ -152,15 +159,19 @@ th {
 }
 
 .highlighted {
-    background-color: #4CAF50; /* Green background for highlighted cells */
+    background-color: #4CAF50;
+}
+
+.is-weekend {
+    background-color: #D3D3D3;
 }
 
 .new-period-cell {
-    background-color: #FFFFE0; /* Light yellow for new period selection */
+    background-color: #FFFFE0;
 }
 
 .highlighted-new-period {
-    background-color: #FFD700; /* Darker yellow for currently highlighted period */
+    background-color: #FFD700;
 }
 
 .rotated {
