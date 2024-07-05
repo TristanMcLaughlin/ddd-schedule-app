@@ -6,21 +6,21 @@ use App\Domain\Entities\DatePeriod;
 use App\Domain\Entities\Project;
 use Carbon\Carbon;
 
-class DevDatePeriodStrategy extends BaseDatePeriodStrategy
+class DueDatePeriodStrategy extends BaseDatePeriodStrategy
 {
     public function createDatePeriod(Project $project, array $epic): ?DatePeriod
     {
-        $startDate = $epic['fields']['customfield_10015'];
-        $qaDueDate = $epic['fields']['customfield_10098'];
+        $startDate = $epic['fields']['customfield_10158'];
+        $endDate = $epic['fields']['customfield_10158'];
 
-        if (!$startDate || !$qaDueDate || !$epic['fields']['customfield_10152']) {
+        if (!$startDate) {
             return null;
         }
 
         $this->project = $project;
         $this->assignee = $epic['fields']['customfield_10152']['accountId'] ?? 'unassigned-developer';
         $this->startDate = Carbon::parse($startDate)->addDay()->format('Y-m-d');
-        $this->endDate = Carbon::parse($qaDueDate)->format('Y-m-d');
+        $this->endDate = Carbon::parse($startDate)->addDay()->format('Y-m-d');
 
         return $this->getDatePeriod();
     }

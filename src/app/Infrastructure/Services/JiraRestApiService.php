@@ -7,6 +7,8 @@ use App\Domain\Services\DatePeriod\DatePeriodContext;
 use App\Domain\Strategies\DatePeriod\ConfigDatePeriodStrategy;
 use App\Domain\Strategies\DatePeriod\ContentDatePeriodStrategy;
 use App\Domain\Strategies\DatePeriod\DevDatePeriodStrategy;
+use App\Domain\Strategies\DatePeriod\DueDatePeriodStrategy;
+use App\Domain\Strategies\DatePeriod\PMDatePeriodStrategy;
 use App\Domain\Strategies\DatePeriod\QADatePeriodStrategy;
 use App\Domain\Strategies\DatePeriod\QADevDatePeriodStrategy;
 use App\Infrastructure\Repositories\EloquentDatePeriodRepository;
@@ -45,6 +47,8 @@ class JiraRestApiService
         $this->datePeriodContext->addStrategy(new QADatePeriodStrategy());
         $this->datePeriodContext->addStrategy(new QADevDatePeriodStrategy());
         $this->datePeriodContext->addStrategy(new ContentDatePeriodStrategy());
+        $this->datePeriodContext->addStrategy(new DueDatePeriodStrategy());
+        $this->datePeriodContext->addStrategy(new PMDatePeriodStrategy());
     }
 
     public function getEpics()
@@ -58,7 +62,7 @@ class JiraRestApiService
         $response = $this->client->get($this->config['endpoints']['rest'] . '/search', [
             'query' => [
                 'jql' => $jql,
-                'fields' => 'id,key,summary,customfield_10015,customfield_10098,customfield_10099,customfield_10152,customfield_10155,customfield_10166,status',
+                'fields' => 'id,key,summary,customfield_10015,customfield_10098,customfield_10099,customfield_10112,customfield_10152,customfield_10155,customfield_10158,customfield_10166,status',
                 'maxResults' => 300
             ],
             'auth' => [$this->config['auth']['username'], $this->config['auth']['apiToken']]
@@ -85,7 +89,11 @@ class JiraRestApiService
 
             $datePeriods = $this->datePeriodContext->createDatePeriods($project, $epic);
             foreach ($datePeriods as $datePeriod) {
-                $this->datePeriodRepository->save($datePeriod);
+                try {
+                    $this->datePeriodRepository->save($datePeriod);
+                } catch (\Exception $e) {
+                    // Do nothinhg for now
+                }
             }
         }
     }
