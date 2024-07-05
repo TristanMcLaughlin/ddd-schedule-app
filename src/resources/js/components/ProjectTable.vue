@@ -17,7 +17,12 @@
                     <th>CAM Link</th>
                     <th>RAG</th>
                     <th class="status">Status</th>
-                    <th v-for="date in dateRange" :key="date" class="rotated"><span>{{ date }}</span></th>
+                    <th
+                        v-for="date in dateRange"
+                        :key="date"
+                        class="rotated"
+                        :class="{'is-weekend': isDateAWeekend(date)}"
+                    ><span>{{ date }}</span></th>
                 </tr>
                 </thead>
                 <tbody v-for="team in teams">
