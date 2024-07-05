@@ -47,7 +47,7 @@ class AssigneePeriodsFormatterService
         // Prepare projects and date periods data
         foreach ($projects as $project) {
             $projectId = $project->getId();
-            $formattedData['projects'][$projectId] = [
+            $formattedData['projects'][] = [
                 'id' => $projectId,
                 'name' => $project->getName(),
                 'build_status' => $project->getBuildStatus(),
