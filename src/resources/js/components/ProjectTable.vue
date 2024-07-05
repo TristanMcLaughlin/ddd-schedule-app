@@ -14,6 +14,7 @@
                 <tr>
                     <th>Assignee</th>
                     <th class="project-name">Project Name</th>
+                    <th>CAM Link</th>
                     <th>RAG</th>
                     <th class="status">Status</th>
                     <th v-for="date in dateRange" :key="date" class="rotated"><span>{{ date }}</span></th>
@@ -38,6 +39,7 @@
                     <tr v-for="project in getFilteredProjectsForAssignee(assignee.id)" :key="project.id">
                         <td></td>
                         <td class="project-name">{{ project.name }}</td>
+                        <td><a :href="`https://opialtd.atlassian.net/browse/${project.id}`" target="_blank">{{ project.id }}</a></td>
                         <td>{{ project.rag_status }}</td>
                         <td class="status">{{ project.build_status }}</td>
                         <td v-for="date in dateRange" :key="date" :class="{'highlighted': isDateInRange(date, project.date_periods, assignee.id)}"></td>
