@@ -5,7 +5,7 @@ namespace App\Infrastructure\Repositories;
 use App\Domain\Entities\BankHoliday;
 use App\Domain\Repositories\BankHolidayRepository;
 use App\Infrastructure\Models\BankHolidayModel;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 
 class EloquentBankHolidayRepository implements BankHolidayRepository
 {
