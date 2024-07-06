@@ -17,5 +17,6 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withCommands([
+        __DIR__.'/../app/Application/Console/Commands',
         __DIR__.'/../app/Application/Console/Commands/Jira',
     ])->create();
