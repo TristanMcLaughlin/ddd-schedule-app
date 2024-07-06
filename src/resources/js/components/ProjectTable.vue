@@ -50,7 +50,9 @@
                         <td v-for="date in dateRange" :key="date" :class="{
                             'highlighted': isDateInRange(date, project.date_periods, assignee.id),
                             'is-weekend': isDateAWeekend(date),
-                            }"></td>
+                            ...projectColourClass(project),
+                            }"
+                        ></td>
                     </tr>
                 </template>
                 </tbody>
@@ -120,6 +122,22 @@ export default {
             return [6, 0].includes(current.day()) ||
                 this.bankHolidays.includes(current.format('YYYY-MM-DD'));
         },
+        projectColourClass(project) {
+            const map = {
+                'green': 'highlighted--green',
+                'amber': 'highlighted--amber',
+                'red': 'highlighted--red',
+                'Backlog': 'highlighted--backlog',
+                'Holidays': 'highlighted--holidays',
+            };
+
+            if (['Backlog', 'Holidays'].includes(project.name)) {
+                return map[project.name];
+            }
+
+            const key = Object.keys(map).find(key => (project.rag_status || '').toLowerCase().includes(key));
+            return key ? { [map[key]]: true } : null;
+        },
     },
 };
 </script>
@@ -166,6 +184,28 @@ th {
 
 .highlighted {
     background-color: #4CAF50;
+
+    &.highlighted{
+        &--green {
+            background-color: #75be51;
+        }
+
+        &--amber {
+            background-color: #e5d58b;
+        }
+
+        &--red {
+            background-color: #e1947e;
+        }
+
+        &--backlog {
+            background-color: #b9dcff;
+        }
+
+        &--holidays {
+            background-color: #c0c0c0;
+        }
+    }
 }
 
 .is-weekend {
