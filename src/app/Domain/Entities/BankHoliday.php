@@ -15,11 +15,4 @@ readonly class BankHoliday
     {
         return $this->date;
     }
-
-    public function toArray(): array
-    {
-        return [
-            'date' => $this->getDate(),
-        ];
-    }
 }
