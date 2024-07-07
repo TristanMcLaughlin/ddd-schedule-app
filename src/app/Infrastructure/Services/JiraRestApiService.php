@@ -69,7 +69,7 @@ class JiraRestApiService
 
     public function getBacklogTickets(): array
     {
-        $jql = 'project = DDD AND issuetype IN ("Change Request", "Defect") AND created >= 2024-03-05 AND status NOT IN ("Done", "Abandoned") AND duedate >= now() AND duedate <= 2m';
+        $jql = 'project = DDD AND issuetype IN ("Change Request", "Defect") AND status NOT IN ("Done", "Abandoned") AND duedate >= -7d AND duedate <= 60d';
         $fields = ['summary', 'status', 'issuetype', 'created', 'priority', 'duedate', 'timeestimate'];
 
         return $this->makeSearchRequest($jql, $fields);
@@ -124,7 +124,7 @@ class JiraRestApiService
             try {
                 $backlogTicket = new BacklogTicket(
                     $ticket['key'],
-                    $ticket['fields']['assignee']['accountId'] ?? '',
+                    $ticket['fields']['assignee']['accountId'] ?? 'unassigned-developer',
                     $ticket['fields']['priority']['name'],
                     Carbon::parse($ticket['fields']['duedate'])->subSeconds($ticket['fields']['timeestimate'] ?? 0)->toDateString(),
                     $ticket['fields']['duedate']
