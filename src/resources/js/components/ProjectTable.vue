@@ -20,7 +20,7 @@
                 </tr>
                 </thead>
                 <tbody v-for="team in teams">
-                <tr v-if="getFilteredAssignees(team.assignees).length"><td colspan="100%" class="table__team-name"><h2>{{team.name}}</h2></td></tr>
+                <tr v-if="selectedProject === ''"><td colspan="100%" class="table__team-name"><h2>{{team.name}}</h2></td></tr>
                 <template v-for="assignee in getFilteredAssignees(team.assignees)" :key="assignee.id">
                     <tr>
                         <td colspan="4" class="table__assignee"><strong>{{ assignee.name }}</strong>
