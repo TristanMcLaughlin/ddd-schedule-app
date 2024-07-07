@@ -67,7 +67,10 @@
                                      width="16" class="tooltip--img">
                                 <span class="tooltiptext">
                                     <div v-for="ticket in getBacklogTicketsOnDate(date, assignee.id)" :key="ticket.id">
-                                        ID: {{ ticket.id }}, Priority: {{ ticket.priority }}
+                                        <a :href="`https://opialtd.atlassian.net/browse${ticket.id}`" target="_blank">
+                                            {{ ticket.summary }}
+                                            ({{ ticket.priority }})
+                                        </a>
                                     </div>
                                 </span>
                             </span>
@@ -325,6 +328,11 @@ th {
     position: relative;
     display: inline-block;
 
+    a {
+        color: white;
+        text-decoration: underline;
+    }
+
     &--img {
         filter:
             drop-shadow( 1px  0px 0px white)
@@ -335,7 +343,7 @@ th {
 
     .tooltiptext {
         visibility: hidden;
-        width: 200px;
+        width: 300px;
         background-color: black;
         color: #fff;
         text-align: center;
@@ -345,7 +353,7 @@ th {
         z-index: 1;
         bottom: 100%;
         left: 50%;
-        margin-left: -100px;
+        margin-left: -150px;
         opacity: 0;
         transition: opacity 0.3s;
     }

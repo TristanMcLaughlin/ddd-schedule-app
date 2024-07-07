@@ -64,6 +64,7 @@ readonly class AssigneePeriodsFormatterService
                 'id' => $ticket->getTicketId(),
                 'assignee_id' => $ticket->getAssigneeId(),
                 'priority' => $ticket->getPriority(),
+                'summary' => $ticket->getSummary(),
                 'start_date' => $ticket->getStartDate(),
                 'end_date' => $ticket->getEndDate(),
             ];
