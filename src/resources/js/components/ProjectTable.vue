@@ -65,7 +65,7 @@
                             ...priorityColourClass(date, assignee.id)
                         }">
                             <span v-if="isDateInBacklogRange(date, assignee.id)" class="tooltip">
-                                {{ getHighestPriorityBacklogTicket(date, assignee.id).id }}
+                                <img :src="getHighestPriorityBacklogTicket(date, assignee.id)?.icon">
                                 <span class="tooltiptext">
                                     <div v-for="ticket in getBacklogTicketsOnDate(date, assignee.id)" :key="ticket.id">
                                         ID: {{ ticket.id }}, Priority: {{ ticket.priority }}
@@ -84,6 +84,11 @@
 <script>
 import moment from 'moment';
 import AddDatePeriodWidget from './AddDatePeriodWidget.vue';
+import Highest from '../../images/priorities/highest.svg';
+import High from '../../images/priorities/high.svg';
+import Medium from '../../images/priorities/medium.svg';
+import Low from '../../images/priorities/low.svg';
+import Lowest from '../../images/priorities/lowest.svg';
 
 export default {
     components: {
@@ -96,11 +101,11 @@ export default {
             unavailableStatuses: ['abandoned', 'ended'],
             addingPeriod: null,
             priorityOrder: [
-                {name: 'Highest', icon: ''},
-                {name: 'High', icon: ''},
-                {name: 'Medium', icon: ''},
-                {name: 'Low', icon: ''},
-                {name: 'Lowest', icon: ''}
+                {name: 'Highest', icon: Highest},
+                {name: 'High', icon: High},
+                {name: 'Medium', icon: Medium},
+                {name: 'Low', icon: Low},
+                {name: 'Lowest', icon: Lowest},
             ],
         };
     },
@@ -182,15 +187,16 @@ export default {
         getHighestPriorityBacklogTicket(date, assigneeId) {
             const tickets = this.getBacklogTicketsOnDate(date, assigneeId);
             const priorityOrder = this.priorityOrder.map(p => p.name);
-            return tickets.sort((a, b) => priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority))[0];
+            const ticket = tickets.sort((a, b) => priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority))[0];
+            return ticket ? this.priorityOrder.find(p => p.name === ticket.priority) : null;
         },
         getBacklogTicketsForAssignee(assigneeId) {
             return this.backlogTickets.filter(ticket => ticket.assignee_id === assigneeId);
         },
         priorityColourClass(date, assigneeId) {
-            const ticket = this.getHighestPriorityBacklogTicket(date, assigneeId);
-            if (!ticket) return {};
-            return { [`highlighted--${ticket.priority.toLowerCase()}`]: true };
+            const priority = this.getHighestPriorityBacklogTicket(date, assigneeId);
+            if (!priority) return {};
+            return { [`highlighted--${priority.name.toLowerCase()}`]: true };
         },
     },
 };
