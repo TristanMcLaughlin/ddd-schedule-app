@@ -60,12 +60,13 @@
                     <tr v-if="getBacklogTicketsForAssignee(assignee.id).length">
                         <td colspan="5"></td>
                         <td v-for="date in dateRange" :key="date" :class="{
-                            'highlighted--backlog': isDateInBacklogRange(date, assignee.id),
+                            'highlighted': isDateInBacklogRange(date, assignee.id),
                             'is-weekend': isDateAWeekend(date),
                             ...priorityColourClass(date, assignee.id)
                         }">
                             <span v-if="isDateInBacklogRange(date, assignee.id)" class="tooltip">
-                                <img :src="getHighestPriorityBacklogTicket(date, assignee.id)?.icon">
+                                <img :src="getHighestPriorityBacklogTicket(date, assignee.id)?.icon" height="16"
+                                     width="16" class="tooltip--img">
                                 <span class="tooltiptext">
                                     <div v-for="ticket in getBacklogTicketsOnDate(date, assignee.id)" :key="ticket.id">
                                         ID: {{ ticket.id }}, Priority: {{ ticket.priority }}
@@ -323,6 +324,14 @@ th {
 .tooltip {
     position: relative;
     display: inline-block;
+
+    &--img {
+        filter:
+            drop-shadow( 1px  0px 0px white)
+            drop-shadow(-1px  0px 0px white)
+            drop-shadow( 0px  1px 0px white)
+            drop-shadow( 0px -1px 0px white);
+    }
 
     .tooltiptext {
         visibility: hidden;
