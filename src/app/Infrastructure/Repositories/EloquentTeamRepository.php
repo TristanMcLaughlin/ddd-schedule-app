@@ -20,7 +20,7 @@ class EloquentTeamRepository implements TeamRepository
 
     public function all()
     {
-        return TeamModel::with('assignees')->get()
+        return TeamModel::orderBy('name')->with('assignees')->get()
             ->map->toDomainEntity();
     }
 }
