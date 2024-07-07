@@ -8,8 +8,9 @@ readonly class BacklogTicket
         private readonly string $ticketId,
         private readonly string $assigneeId,
         private readonly string $priority,
+        private readonly string $summary,
         private readonly string $startDate,
-        private readonly string $endDate
+        private readonly string $endDate,
     ) {}
 
     public function getTicketId(): string
@@ -35,5 +36,10 @@ readonly class BacklogTicket
     public function getEndDate(): string
     {
         return $this->endDate;
+    }
+
+    public function getSummary(): string
+    {
+        return $this->summary;
     }
 }

@@ -26,8 +26,9 @@ class EloquentBacklogTicketRepositoryTest extends TestCase
             'TICKET-123',
             'assignee-1',
             'High',
+            'Test',
             '2024-03-01',
-            '2024-03-05'
+            '2024-03-05',
         );
 
         $this->repository->save($backlogTicket);
@@ -37,7 +38,8 @@ class EloquentBacklogTicketRepositoryTest extends TestCase
             'assignee_id' => 'assignee-1',
             'priority' => 'High',
             'start_date' => '2024-03-01',
-            'end_date' => '2024-03-05'
+            'end_date' => '2024-03-05',
+            'summary' => 'Test',
         ]);
     }
 
@@ -47,16 +49,18 @@ class EloquentBacklogTicketRepositoryTest extends TestCase
             'TICKET-123',
             'assignee-1',
             'High',
+            'Test',
             '2024-03-01',
-            '2024-03-05'
+            '2024-03-05',
         );
 
         $backlogTicket2 = new BacklogTicket(
             'TICKET-456',
             'assignee-2',
             'Medium',
+            'Test',
             '2024-04-01',
-            '2024-04-05'
+            '2024-04-05',
         );
 
         $this->repository->save($backlogTicket1);

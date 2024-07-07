@@ -126,8 +126,9 @@ class JiraRestApiService
                     $ticket['key'],
                     $ticket['fields']['assignee']['accountId'] ?? 'unassigned-developer',
                     $ticket['fields']['priority']['name'],
+                    $ticket['fields']['summary'],
                     Carbon::parse($ticket['fields']['duedate'])->subSeconds($ticket['fields']['timeestimate'] ?? 0)->toDateString(),
-                    $ticket['fields']['duedate']
+                    $ticket['fields']['duedate'],
                 );
 
                 $this->backlogTicketRepository->save($backlogTicket);

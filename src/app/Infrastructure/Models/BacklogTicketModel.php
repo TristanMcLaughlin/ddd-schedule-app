@@ -12,7 +12,7 @@ class BacklogTicketModel extends Model
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
-    protected $fillable = ['ticket_id', 'assignee_id', 'priority', 'start_date', 'end_date'];
+    protected $fillable = ['ticket_id', 'assignee_id', 'priority', 'start_date', 'end_date', 'summary'];
 
     public function assignee()
     {
@@ -25,8 +25,9 @@ class BacklogTicketModel extends Model
             $this->ticket_id,
             $this->assignee_id,
             $this->priority,
+            $this->summary,
             $this->start_date,
-            $this->end_date
+            $this->end_date,
         );
     }
 }

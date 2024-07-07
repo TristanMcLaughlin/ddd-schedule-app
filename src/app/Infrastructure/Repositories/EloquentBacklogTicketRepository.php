@@ -17,6 +17,7 @@ class EloquentBacklogTicketRepository implements BacklogTicketRepository
             [
                 'assignee_id' => $backlogTicket->getAssigneeId(),
                 'priority' => $backlogTicket->getPriority(),
+                'summary' => $backlogTicket->getSummary(),
                 'start_date' => $backlogTicket->getStartDate(),
                 'end_date' => $backlogTicket->getEndDate(),
             ]
