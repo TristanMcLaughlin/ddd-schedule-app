@@ -3,6 +3,7 @@
 namespace App\Infrastructure\Services;
 
 use App\Domain\Entities\Project;
+use App\Domain\Entities\BacklogTicket;
 use App\Domain\Services\DatePeriod\DatePeriodContext;
 use App\Domain\Strategies\DatePeriod\ConfigDatePeriodStrategy;
 use App\Domain\Strategies\DatePeriod\ContentDatePeriodStrategy;
@@ -13,59 +14,39 @@ use App\Domain\Strategies\DatePeriod\QADatePeriodStrategy;
 use App\Domain\Strategies\DatePeriod\QADevDatePeriodStrategy;
 use App\Infrastructure\Repositories\EloquentDatePeriodRepository;
 use App\Infrastructure\Repositories\EloquentProjectRepository;
+use App\Infrastructure\Repositories\EloquentBacklogTicketRepository;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 
 class JiraRestApiService
 {
     protected $client;
-    protected $config;
     protected $projectRepository;
     protected $datePeriodRepository;
-    private DatePeriodContext $datePeriodContext;
+    protected $backlogTicketRepository;
 
     public function __construct(
         Client $client,
         EloquentProjectRepository $projectRepository,
         EloquentDatePeriodRepository $datePeriodRepository,
-        DatePeriodContext $datePeriodContext
+        EloquentBacklogTicketRepository $backlogTicketRepository
     )
     {
         $this->client = $client;
-        $this->config = config('jira');
         $this->projectRepository = $projectRepository;
         $this->datePeriodRepository = $datePeriodRepository;
-        $this->datePeriodContext = $datePeriodContext;
-
-        $this->initializeStrategies();
+        $this->backlogTicketRepository = $backlogTicketRepository;
     }
 
-    protected function initializeStrategies()
+    protected function makeSearchRequest(string $jql, array $fields, int $maxResults = 300): array
     {
-        $this->datePeriodContext->addStrategy(new ConfigDatePeriodStrategy());
-        $this->datePeriodContext->addStrategy(new DevDatePeriodStrategy());
-        $this->datePeriodContext->addStrategy(new QADatePeriodStrategy());
-        $this->datePeriodContext->addStrategy(new QADevDatePeriodStrategy());
-        $this->datePeriodContext->addStrategy(new ContentDatePeriodStrategy());
-        $this->datePeriodContext->addStrategy(new DueDatePeriodStrategy());
-        $this->datePeriodContext->addStrategy(new PMDatePeriodStrategy());
-    }
-
-    public function getEpics()
-    {
-        // Calculate the date 4 months ago
-        $fourMonthsAgo = Carbon::now()->subMonths(4)->format('Y-m-d');
-
-        // JQL query to find epics in the CAM project created within the last 4 months
-        $jql = "project = CAM AND issuetype = Epic AND created >= $fourMonthsAgo";
-
-        $response = $this->client->get($this->config['endpoints']['rest'] . '/search', [
+        $response = $this->client->get(config('jira.endpoints.rest') . '/search', [
             'query' => [
                 'jql' => $jql,
-                'fields' => 'id,key,summary,customfield_10015,customfield_10098,customfield_10099,customfield_10112,customfield_10152,customfield_10155,customfield_10158,customfield_10166,status',
-                'maxResults' => 300
+                'fields' => implode(',', $fields),
+                'maxResults' => $maxResults
             ],
-            'auth' => [$this->config['auth']['username'], $this->config['auth']['apiToken']]
+            'auth' => [config('jira.auth.username'), config('jira.auth.apiToken')]
         ]);
 
         $data = json_decode($response->getBody()->getContents(), true);
@@ -73,27 +54,87 @@ class JiraRestApiService
         return $data['issues'] ?? [];
     }
 
+    public function getEpics(): array
+    {
+        $fourMonthsAgo = Carbon::now()->subMonths(4)->format('Y-m-d');
+        $jql = "project = CAM AND issuetype = Epic AND created >= $fourMonthsAgo";
+        $fields = [
+            'id', 'key', 'summary', 'customfield_10015', 'customfield_10098',
+            'customfield_10099', 'customfield_10112', 'customfield_10152',
+            'customfield_10155', 'customfield_10158', 'customfield_10166', 'status'
+        ];
+
+        return $this->makeSearchRequest($jql, $fields);
+    }
+
+    public function getBacklogTickets(): array
+    {
+        $jql = 'project = DDD AND issuetype IN ("Change Request", "Defect") AND status NOT IN ("Done", "Abandoned") AND duedate >= -7d AND duedate <= 60d';
+        $fields = ['summary', 'assignee', 'status', 'issuetype', 'created', 'priority', 'duedate', 'timeestimate'];
+
+        return $this->makeSearchRequest($jql, $fields);
+    }
+
+    protected function createDatePeriodContext(): DatePeriodContext
+    {
+        $datePeriodContext = new DatePeriodContext();
+        $datePeriodContext->addStrategy(new ConfigDatePeriodStrategy());
+        $datePeriodContext->addStrategy(new DevDatePeriodStrategy());
+        $datePeriodContext->addStrategy(new QADatePeriodStrategy());
+        $datePeriodContext->addStrategy(new QADevDatePeriodStrategy());
+        $datePeriodContext->addStrategy(new ContentDatePeriodStrategy());
+        $datePeriodContext->addStrategy(new DueDatePeriodStrategy());
+        $datePeriodContext->addStrategy(new PMDatePeriodStrategy());
+
+        return $datePeriodContext;
+    }
+
     public function syncProjects()
     {
         $epics = $this->getEpics();
+        $datePeriodContext = $this->createDatePeriodContext();
 
         foreach ($epics as $epic) {
             $project = new Project(
-                $epic['key'], // id
-                $epic['fields']['summary'], // name
-                $epic['fields']['status']['name'], // build status
-                $epic['fields']['customfield_10166']['value'] ?? '' // rag status
+                $epic['key'],
+                $epic['fields']['summary'],
+                $epic['fields']['status']['name'],
+                $epic['fields']['customfield_10166']['value'] ?? ''
             );
 
             $this->projectRepository->save($project);
 
-            $datePeriods = $this->datePeriodContext->createDatePeriods($project, $epic);
+            $datePeriods = $datePeriodContext->createDatePeriods($project, $epic);
             foreach ($datePeriods as $datePeriod) {
                 try {
                     $this->datePeriodRepository->save($datePeriod);
                 } catch (\Exception $e) {
-                    // Do nothinhg for now
+                    // Ideally this would log to Sentry
+                    // So I should get a trial lol
                 }
+            }
+        }
+    }
+
+    public function syncBacklogTickets()
+    {
+        $backlogTickets = $this->getBacklogTickets();
+
+        foreach ($backlogTickets as $ticket) {
+            try {
+                $backlogTicket = new BacklogTicket(
+                    $ticket['key'],
+                    $ticket['fields']['assignee']['accountId'] ?? 'unassigned-developer',
+                    $ticket['fields']['priority']['name'],
+                    $ticket['fields']['summary'],
+                    Carbon::parse($ticket['fields']['duedate'])->subSeconds($ticket['fields']['timeestimate'] ?? 0)->toDateString(),
+                    $ticket['fields']['duedate'],
+                );
+
+                $this->backlogTicketRepository->save($backlogTicket);
+            } catch (\Exception $e) {
+                // Ideally this would log to Sentry
+                // So I should get a trial lol
             }
         }
     }

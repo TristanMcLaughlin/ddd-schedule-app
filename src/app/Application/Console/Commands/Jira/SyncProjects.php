@@ -21,6 +21,7 @@ class SyncProjects extends Command
     public function handle()
     {
         $this->jiraRestApiService->syncProjects();
+        $this->jiraRestApiService->syncBacklogTickets();
         $this->info('Projects (epics) synchronized successfully.');
     }
 }

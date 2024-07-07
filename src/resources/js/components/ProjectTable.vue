@@ -26,10 +26,10 @@
                 </tr>
                 </thead>
                 <tbody v-for="team in teams">
-                <tr><td colspan="4"><h2>{{team.name}}</h2></td></tr>
+                <tr><td colspan="100%" class="table__team-name"><h2>{{team.name}}</h2></td></tr>
                 <template v-for="assignee in team.assignees" :key="assignee.id">
                     <tr>
-                        <td colspan="4" class="table__assignee">{{ assignee.name }}
+                        <td colspan="4" class="table__assignee"><strong>{{ assignee.name }}</strong>
                             <button @click="toggleAddPeriod(assignee.id)" class="add-date-period__new">➕</button>
                         </td>
                     </tr>
@@ -54,6 +54,28 @@
                             }"
                         ></td>
                     </tr>
+                    <tr v-if="getBacklogTicketsForAssignee(assignee.id).length">
+                        <td></td>
+                        <td colspan="4" class="project-name">Backlog Tickets</td>
+                        <td v-for="date in dateRange" :key="date" :class="{
+                            'highlighted': isDateInBacklogRange(date, assignee.id),
+                            'is-weekend': isDateAWeekend(date),
+                            ...priorityColourClass(date, assignee.id)
+                        }">
+                            <span v-if="isDateInBacklogRange(date, assignee.id)" class="tooltip">
+                                <img :src="getHighestPriorityBacklogTicket(date, assignee.id)?.icon" height="16"
+                                     width="16" class="tooltip--img">
+                                <span class="tooltiptext">
+                                    <div v-for="ticket in getBacklogTicketsOnDate(date, assignee.id)" :key="ticket.id">
+                                        <a :href="`https://opialtd.atlassian.net/browse${ticket.id}`" target="_blank">
+                                            {{ ticket.summary }}
+                                            ({{ ticket.priority }})
+                                        </a>
+                                    </div>
+                                </span>
+                            </span>
+                        </td>
+                    </tr>
                 </template>
                 </tbody>
             </table>
@@ -64,17 +86,29 @@
 <script>
 import moment from 'moment';
 import AddDatePeriodWidget from './AddDatePeriodWidget.vue';
+import Highest from '../../images/priorities/highest.svg';
+import High from '../../images/priorities/high.svg';
+import Medium from '../../images/priorities/medium.svg';
+import Low from '../../images/priorities/low.svg';
+import Lowest from '../../images/priorities/lowest.svg';
 
 export default {
     components: {
         AddDatePeriodWidget,
     },
-    props: ['projects', 'teams', 'dateRange', 'bankHolidays'],
+    props: ['projects', 'teams', 'dateRange', 'bankHolidays', 'backlogTickets'],
     data() {
         return {
             selectedProject: '',
             unavailableStatuses: ['abandoned', 'ended'],
             addingPeriod: null,
+            priorityOrder: [
+                {name: 'Highest', icon: Highest},
+                {name: 'High', icon: High},
+                {name: 'Medium', icon: Medium},
+                {name: 'Low', icon: Low},
+                {name: 'Lowest', icon: Lowest},
+            ],
         };
     },
     computed: {
@@ -111,7 +145,7 @@ export default {
             return this.addingPeriod === assigneeId;
         },
         cancelAddingPeriod() {
-          return this.addingPeriod = null;
+            return this.addingPeriod = null;
         },
         handleSaveDatePeriod(payload) {
             this.$emit('save-date-period', payload);
@@ -138,18 +172,46 @@ export default {
             const key = Object.keys(map).find(key => (project.rag_status || '').toLowerCase().includes(key));
             return key ? { [map[key]]: true } : null;
         },
+        isDateInBacklogRange(date, assigneeId) {
+            const current = moment(date);
+            return this.backlogTickets.some(ticket =>
+                ticket.assignee_id === assigneeId &&
+                current.isBetween(moment(ticket.start_date), moment(ticket.end_date), 'days', '[]')
+            );
+        },
+        getBacklogTicketsOnDate(date, assigneeId) {
+            const current = moment(date);
+            return this.backlogTickets.filter(ticket =>
+                ticket.assignee_id === assigneeId &&
+                current.isBetween(moment(ticket.start_date), moment(ticket.end_date), 'days', '[]')
+            );
+        },
+        getHighestPriorityBacklogTicket(date, assigneeId) {
+            const tickets = this.getBacklogTicketsOnDate(date, assigneeId);
+            const priorityOrder = this.priorityOrder.map(p => p.name);
+            const ticket = tickets.sort((a, b) => priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority))[0];
+            return ticket ? this.priorityOrder.find(p => p.name === ticket.priority) : null;
+        },
+        getBacklogTicketsForAssignee(assigneeId) {
+            return this.backlogTickets.filter(ticket => ticket.assignee_id === assigneeId);
+        },
+        priorityColourClass(date, assigneeId) {
+            const priority = this.getHighestPriorityBacklogTicket(date, assigneeId);
+            if (!priority) return {};
+            return { [`highlighted--${priority.name.toLowerCase()}`]: true };
+        },
     },
 };
 </script>
 
 <style lang="scss">
-/* Add some basic styling */
 .table {
     width: 100%;
     border-collapse: collapse;
 
     .project-name, .status {
         min-width: 140px;
+        color: grey;
     }
 
     &__assignee {
@@ -159,6 +221,15 @@ export default {
     thead {
         position: sticky;
         top: 0;
+        z-index: 1;
+    }
+
+    &__team-name {
+        background-color: darkslategrey;
+        color: white;
+        position: sticky;
+        top: 100px;
+        z-index: 1;
     }
 }
 
@@ -180,12 +251,13 @@ th {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    text-align: left;
 }
 
 .highlighted {
     background-color: #4CAF50;
 
-    &.highlighted{
+    &.highlighted {
         &--green {
             background-color: #75be51;
         }
@@ -205,6 +277,26 @@ th {
         &--holidays {
             background-color: #c0c0c0;
         }
+
+        &--highest {
+            background-color: #ff0000; // Change color as needed
+        }
+
+        &--high {
+            background-color: #ff4500; // Change color as needed
+        }
+
+        &--medium {
+            background-color: #ff8c00; // Change color as needed
+        }
+
+        &--low {
+            background-color: #ffd700; // Change color as needed
+        }
+
+        &--lowest {
+            background-color: #9acd32; // Change color as needed
+        }
     }
 }
 
@@ -221,23 +313,63 @@ th {
 }
 
 .rotated {
-    height: 120px;
+    height: 90px;
     width: 16px;
     vertical-align: bottom;
-    padding: 8px;
+    padding: 5px 8px;
     margin: 0;
     position: relative;
     min-width: 0;
+
+    span {
+        display: block;
+        transform: rotate(-90deg);
+        transform-origin: left top 0;
+        white-space: nowrap;
+        font-size: 12px;
+        line-height: 16px;
+        position: absolute;
+        left: 0;
+    }
 }
 
-.rotated span {
-    display: block;
-    transform: rotate(-90deg);
-    transform-origin: left top 0;
-    white-space: nowrap;
-    font-size: 12px;
-    line-height: 16px;
-    position: absolute;
-    left: 0;
+.tooltip {
+    position: relative;
+    display: inline-block;
+
+    a {
+        color: white;
+        text-decoration: underline;
+    }
+
+    &--img {
+        filter:
+            drop-shadow( 1px  0px 0px white)
+            drop-shadow(-1px  0px 0px white)
+            drop-shadow( 0px  1px 0px white)
+            drop-shadow( 0px -1px 0px white);
+    }
+
+    .tooltiptext {
+        visibility: hidden;
+        width: 300px;
+        background-color: black;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        position: absolute;
+        z-index: 1;
+        bottom: 100%;
+        left: 50%;
+        margin-left: -150px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    &:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+    }
 }
 </style>
