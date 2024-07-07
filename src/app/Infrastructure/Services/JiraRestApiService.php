@@ -70,7 +70,7 @@ class JiraRestApiService
     public function getBacklogTickets(): array
     {
         $jql = 'project = DDD AND issuetype IN ("Change Request", "Defect") AND status NOT IN ("Done", "Abandoned") AND duedate >= -7d AND duedate <= 60d';
-        $fields = ['summary', 'status', 'issuetype', 'created', 'priority', 'duedate', 'timeestimate'];
+        $fields = ['summary', 'assignee', 'status', 'issuetype', 'created', 'priority', 'duedate', 'timeestimate'];
 
         return $this->makeSearchRequest($jql, $fields);
     }
