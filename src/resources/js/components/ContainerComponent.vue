@@ -66,7 +66,6 @@ export default {
         async saveDatePeriod(payload) {
             try {
                 const response = await axios.post(`/api/projects/${payload.project_id}/date-periods`, payload);
-                console.log('Date period saved:', response.data);
                 this.fetchData();
             } catch (error) {
                 console.error('Error saving date period:', error.response.data);

@@ -1,12 +1,6 @@
 <template>
     <div>
-        <div>
-            <label for="projectFilter">Filter by Project Name:</label>
-            <select v-model="selectedProject" id="projectFilter">
-                <option value="">All</option>
-                <option v-for="project in uniqueProjectNames" :key="project" :value="project">{{ project }}</option>
-            </select>
-        </div>
+        <ProjectFilter :projects="projects" @project-filtered="filterProjects" />
 
         <div>
             <table class="table">
@@ -26,8 +20,8 @@
                 </tr>
                 </thead>
                 <tbody v-for="team in teams">
-                <tr><td colspan="100%" class="table__team-name"><h2>{{team.name}}</h2></td></tr>
-                <template v-for="assignee in team.assignees" :key="assignee.id">
+                <tr v-if="getFilteredAssignees(team.assignees).length"><td colspan="100%" class="table__team-name"><h2>{{team.name}}</h2></td></tr>
+                <template v-for="assignee in getFilteredAssignees(team.assignees)" :key="assignee.id">
                     <tr>
                         <td colspan="4" class="table__assignee"><strong>{{ assignee.name }}</strong>
                             <button @click="toggleAddPeriod(assignee.id)" class="add-date-period__new">➕</button>
@@ -56,7 +50,7 @@
                     </tr>
                     <BacklogTicketsRow
                         :date-range="dateRange"
-                        :backlog-tickets="getBacklogTicketsForAssignee(assignee.id)"
+                        :backlog-tickets="getFilteredBacklogTicketsForAssignee(assignee.id)"
                         :bank-holidays="bankHolidays"
                     />
                 </template>
@@ -70,11 +64,13 @@
 import moment from 'moment';
 import AddDatePeriodWidget from './AddDatePeriodWidget.vue';
 import BacklogTicketsRow from './BacklogTicketsRow.vue';
+import ProjectFilter from './ProjectFilter.vue';
 
 export default {
     components: {
         AddDatePeriodWidget,
         BacklogTicketsRow,
+        ProjectFilter,
     },
     props: ['projects', 'teams', 'dateRange', 'bankHolidays', 'backlogTickets'],
     data() {
@@ -84,13 +80,10 @@ export default {
             addingPeriod: null,
         };
     },
-    computed: {
-        uniqueProjectNames() {
-            const projectNames = this.projects.map(project => project.name);
-            return [...new Set(projectNames)];
-        },
-    },
     methods: {
+        filterProjects(selectedProject) {
+            this.selectedProject = selectedProject;
+        },
         isDateInRange(date, datePeriods, assigneeId) {
             const current = moment(date);
             return datePeriods.some(period =>
@@ -106,7 +99,7 @@ export default {
         },
         getFilteredProjectsForAssignee(assigneeId) {
             return this.getProjectsForAssignee(assigneeId).filter(project =>
-                !this.unavailableStatuses.includes(project.build_status.toLowerCase())  &&
+                !this.unavailableStatuses.includes(project.build_status.toLowerCase()) &&
                 (this.selectedProject === '' || project.name === this.selectedProject)
             );
         },
@@ -144,8 +137,17 @@ export default {
             const key = Object.keys(map).find(key => (project.rag_status || '').toLowerCase().includes(key));
             return key ? { [map[key]]: true } : null;
         },
+        getFilteredAssignees(assignees) {
+            if (!this.selectedProject) return assignees;
+            return assignees.filter(assignee => this.getFilteredProjectsForAssignee(assignee.id).length > 0 || this.getFilteredBacklogTicketsForAssignee(assignee.id).length > 0);
+        },
         getBacklogTicketsForAssignee(assigneeId) {
             return this.backlogTickets.filter(ticket => ticket.assignee_id === assigneeId);
+        },
+        getFilteredBacklogTicketsForAssignee(assigneeId) {
+            return this.getBacklogTicketsForAssignee(assigneeId).filter(ticket =>
+                this.selectedProject === '' || ticket.summary.includes(this.selectedProject)
+            );
         },
     },
 };
