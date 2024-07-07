@@ -5,7 +5,9 @@
             :teams="teams"
             :date-range="dateRange"
             :bank-holidays="bankHolidays"
+            :backlog-tickets="backlogTickets"
             @save-date-period="saveDatePeriod"
+            v-if="loaded"
         />
     </div>
 </template>
@@ -24,7 +26,9 @@ export default {
             projects: [],
             teams: [],
             bankHolidays: [],
+            backlogTickets: [],
             dateRange: this.generateDateRange(),
+            loaded: false,
         };
     },
     created() {
@@ -40,9 +44,12 @@ export default {
             const response = await axios.get('/api/projects');
             this.projects = Object.values(response.data.projects);
             this.teams = Object.values(response.data.teams);
+            this.backlogTickets = Object.values(response.data.backlog_tickets);
 
             const bankHolidays = await axios.get('/api/bank-holidays');
             this.bankHolidays = bankHolidays.data.map(bh => bh.date);
+
+            this.loaded = true;
         },
         generateDateRange() {
             const start = moment();

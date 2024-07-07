@@ -54,6 +54,26 @@
                             }"
                         ></td>
                     </tr>
+                    <tr v-if="getBacklogTicketsForAssignee(assignee.id).length">
+                        <td colspan="4" class="table__assignee">Backlog Tickets</td>
+                    </tr>
+                    <tr v-if="getBacklogTicketsForAssignee(assignee.id).length">
+                        <td colspan="5"></td>
+                        <td v-for="date in dateRange" :key="date" :class="{
+                            'highlighted--backlog': isDateInBacklogRange(date, assignee.id),
+                            'is-weekend': isDateAWeekend(date),
+                            ...priorityColourClass(date, assignee.id)
+                        }">
+                            <span v-if="isDateInBacklogRange(date, assignee.id)" class="tooltip">
+                                {{ getHighestPriorityBacklogTicket(date, assignee.id).id }}
+                                <span class="tooltiptext">
+                                    <div v-for="ticket in getBacklogTicketsOnDate(date, assignee.id)" :key="ticket.id">
+                                        ID: {{ ticket.id }}, Priority: {{ ticket.priority }}
+                                    </div>
+                                </span>
+                            </span>
+                        </td>
+                    </tr>
                 </template>
                 </tbody>
             </table>
@@ -69,12 +89,19 @@ export default {
     components: {
         AddDatePeriodWidget,
     },
-    props: ['projects', 'teams', 'dateRange', 'bankHolidays'],
+    props: ['projects', 'teams', 'dateRange', 'bankHolidays', 'backlogTickets'],
     data() {
         return {
             selectedProject: '',
             unavailableStatuses: ['abandoned', 'ended'],
             addingPeriod: null,
+            priorityOrder: [
+                {name: 'Highest', icon: ''},
+                {name: 'High', icon: ''},
+                {name: 'Medium', icon: ''},
+                {name: 'Low', icon: ''},
+                {name: 'Lowest', icon: ''}
+            ],
         };
     },
     computed: {
@@ -111,7 +138,7 @@ export default {
             return this.addingPeriod === assigneeId;
         },
         cancelAddingPeriod() {
-          return this.addingPeriod = null;
+            return this.addingPeriod = null;
         },
         handleSaveDatePeriod(payload) {
             this.$emit('save-date-period', payload);
@@ -138,12 +165,38 @@ export default {
             const key = Object.keys(map).find(key => (project.rag_status || '').toLowerCase().includes(key));
             return key ? { [map[key]]: true } : null;
         },
+        isDateInBacklogRange(date, assigneeId) {
+            const current = moment(date);
+            return this.backlogTickets.some(ticket =>
+                ticket.assignee_id === assigneeId &&
+                current.isBetween(moment(ticket.start_date), moment(ticket.end_date), 'days', '[]')
+            );
+        },
+        getBacklogTicketsOnDate(date, assigneeId) {
+            const current = moment(date);
+            return this.backlogTickets.filter(ticket =>
+                ticket.assignee_id === assigneeId &&
+                current.isBetween(moment(ticket.start_date), moment(ticket.end_date), 'days', '[]')
+            );
+        },
+        getHighestPriorityBacklogTicket(date, assigneeId) {
+            const tickets = this.getBacklogTicketsOnDate(date, assigneeId);
+            const priorityOrder = this.priorityOrder.map(p => p.name);
+            return tickets.sort((a, b) => priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority))[0];
+        },
+        getBacklogTicketsForAssignee(assigneeId) {
+            return this.backlogTickets.filter(ticket => ticket.assignee_id === assigneeId);
+        },
+        priorityColourClass(date, assigneeId) {
+            const ticket = this.getHighestPriorityBacklogTicket(date, assigneeId);
+            if (!ticket) return {};
+            return { [`highlighted--${ticket.priority.toLowerCase()}`]: true };
+        },
     },
 };
 </script>
 
 <style lang="scss">
-/* Add some basic styling */
 .table {
     width: 100%;
     border-collapse: collapse;
@@ -185,7 +238,7 @@ th {
 .highlighted {
     background-color: #4CAF50;
 
-    &.highlighted{
+    &.highlighted {
         &--green {
             background-color: #75be51;
         }
@@ -204,6 +257,26 @@ th {
 
         &--holidays {
             background-color: #c0c0c0;
+        }
+
+        &--highest {
+            background-color: #ff0000; // Change color as needed
+        }
+
+        &--high {
+            background-color: #ff4500; // Change color as needed
+        }
+
+        &--medium {
+            background-color: #ff8c00; // Change color as needed
+        }
+
+        &--low {
+            background-color: #ffd700; // Change color as needed
+        }
+
+        &--lowest {
+            background-color: #9acd32; // Change color as needed
         }
     }
 }
@@ -228,16 +301,43 @@ th {
     margin: 0;
     position: relative;
     min-width: 0;
+
+    span {
+        display: block;
+        transform: rotate(-90deg);
+        transform-origin: left top 0;
+        white-space: nowrap;
+        font-size: 12px;
+        line-height: 16px;
+        position: absolute;
+        left: 0;
+    }
 }
 
-.rotated span {
-    display: block;
-    transform: rotate(-90deg);
-    transform-origin: left top 0;
-    white-space: nowrap;
-    font-size: 12px;
-    line-height: 16px;
-    position: absolute;
-    left: 0;
+.tooltip {
+    position: relative;
+    display: inline-block;
+
+    .tooltiptext {
+        visibility: hidden;
+        width: 200px;
+        background-color: black;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        position: absolute;
+        z-index: 1;
+        bottom: 100%;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    &:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+    }
 }
 </style>
