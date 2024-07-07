@@ -24,6 +24,11 @@ class AssigneeModel extends Model
         return $this->belongsTo(TeamModel::class);
     }
 
+    public function backlogTickets()
+    {
+        return $this->hasMany(BacklogTicketModel::class, 'assignee_id');
+    }
+
     public function toDomainEntity(): Assignee
     {
         return new Assignee(
