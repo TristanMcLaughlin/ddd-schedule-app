@@ -1,12 +1,6 @@
 <template>
     <div>
-        <div>
-            <label for="projectFilter">Filter by Project Name:</label>
-            <select v-model="selectedProject" id="projectFilter">
-                <option value="">All</option>
-                <option v-for="project in uniqueProjectNames" :key="project" :value="project">{{ project }}</option>
-            </select>
-        </div>
+        <ProjectFilter :projects="projects" @project-filtered="filterProjects" />
 
         <div>
             <table class="table">
@@ -26,8 +20,8 @@
                 </tr>
                 </thead>
                 <tbody v-for="team in teams">
-                <tr><td colspan="100%" class="table__team-name"><h2>{{team.name}}</h2></td></tr>
-                <template v-for="assignee in team.assignees" :key="assignee.id">
+                <tr v-if="selectedProject === ''"><td colspan="100%" class="table__team-name"><h2>{{team.name}}</h2></td></tr>
+                <template v-for="assignee in getFilteredAssignees(team.assignees)" :key="assignee.id">
                     <tr>
                         <td colspan="4" class="table__assignee"><strong>{{ assignee.name }}</strong>
                             <button @click="toggleAddPeriod(assignee.id)" class="add-date-period__new">➕</button>
@@ -54,28 +48,11 @@
                             }"
                         ></td>
                     </tr>
-                    <tr v-if="getBacklogTicketsForAssignee(assignee.id).length">
-                        <td></td>
-                        <td colspan="4" class="project-name">Backlog Tickets</td>
-                        <td v-for="date in dateRange" :key="date" :class="{
-                            'highlighted': isDateInBacklogRange(date, assignee.id),
-                            'is-weekend': isDateAWeekend(date),
-                            ...priorityColourClass(date, assignee.id)
-                        }">
-                            <span v-if="isDateInBacklogRange(date, assignee.id)" class="tooltip">
-                                <img :src="getHighestPriorityBacklogTicket(date, assignee.id)?.icon" height="16"
-                                     width="16" class="tooltip--img">
-                                <span class="tooltiptext">
-                                    <div v-for="ticket in getBacklogTicketsOnDate(date, assignee.id)" :key="ticket.id">
-                                        <a :href="`https://opialtd.atlassian.net/browse${ticket.id}`" target="_blank">
-                                            {{ ticket.summary }}
-                                            ({{ ticket.priority }})
-                                        </a>
-                                    </div>
-                                </span>
-                            </span>
-                        </td>
-                    </tr>
+                    <BacklogTicketsRow
+                        :date-range="dateRange"
+                        :backlog-tickets="getFilteredBacklogTicketsForAssignee(assignee.id)"
+                        :bank-holidays="bankHolidays"
+                    />
                 </template>
                 </tbody>
             </table>
@@ -86,15 +63,14 @@
 <script>
 import moment from 'moment';
 import AddDatePeriodWidget from './AddDatePeriodWidget.vue';
-import Highest from '../../images/priorities/highest.svg';
-import High from '../../images/priorities/high.svg';
-import Medium from '../../images/priorities/medium.svg';
-import Low from '../../images/priorities/low.svg';
-import Lowest from '../../images/priorities/lowest.svg';
+import BacklogTicketsRow from './BacklogTicketsRow.vue';
+import ProjectFilter from './ProjectFilter.vue';
 
 export default {
     components: {
         AddDatePeriodWidget,
+        BacklogTicketsRow,
+        ProjectFilter,
     },
     props: ['projects', 'teams', 'dateRange', 'bankHolidays', 'backlogTickets'],
     data() {
@@ -102,22 +78,12 @@ export default {
             selectedProject: '',
             unavailableStatuses: ['abandoned', 'ended'],
             addingPeriod: null,
-            priorityOrder: [
-                {name: 'Highest', icon: Highest},
-                {name: 'High', icon: High},
-                {name: 'Medium', icon: Medium},
-                {name: 'Low', icon: Low},
-                {name: 'Lowest', icon: Lowest},
-            ],
         };
     },
-    computed: {
-        uniqueProjectNames() {
-            const projectNames = this.projects.map(project => project.name);
-            return [...new Set(projectNames)];
-        },
-    },
     methods: {
+        filterProjects(selectedProject) {
+            this.selectedProject = selectedProject;
+        },
         isDateInRange(date, datePeriods, assigneeId) {
             const current = moment(date);
             return datePeriods.some(period =>
@@ -127,14 +93,13 @@ export default {
         },
         getProjectsForAssignee(assigneeId) {
             const today = moment().startOf('day');
-
             return this.projects.filter(project =>
                 project.date_periods.some(period => period.assignee_id === assigneeId && moment(period.end).isSameOrAfter(today))
             );
         },
         getFilteredProjectsForAssignee(assigneeId) {
             return this.getProjectsForAssignee(assigneeId).filter(project =>
-                !this.unavailableStatuses.includes(project.build_status.toLowerCase())  &&
+                !this.unavailableStatuses.includes(project.build_status.toLowerCase()) &&
                 (this.selectedProject === '' || project.name === this.selectedProject)
             );
         },
@@ -172,33 +137,17 @@ export default {
             const key = Object.keys(map).find(key => (project.rag_status || '').toLowerCase().includes(key));
             return key ? { [map[key]]: true } : null;
         },
-        isDateInBacklogRange(date, assigneeId) {
-            const current = moment(date);
-            return this.backlogTickets.some(ticket =>
-                ticket.assignee_id === assigneeId &&
-                current.isBetween(moment(ticket.start_date), moment(ticket.end_date), 'days', '[]')
-            );
-        },
-        getBacklogTicketsOnDate(date, assigneeId) {
-            const current = moment(date);
-            return this.backlogTickets.filter(ticket =>
-                ticket.assignee_id === assigneeId &&
-                current.isBetween(moment(ticket.start_date), moment(ticket.end_date), 'days', '[]')
-            );
-        },
-        getHighestPriorityBacklogTicket(date, assigneeId) {
-            const tickets = this.getBacklogTicketsOnDate(date, assigneeId);
-            const priorityOrder = this.priorityOrder.map(p => p.name);
-            const ticket = tickets.sort((a, b) => priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority))[0];
-            return ticket ? this.priorityOrder.find(p => p.name === ticket.priority) : null;
+        getFilteredAssignees(assignees) {
+            if (!this.selectedProject) return assignees;
+            return assignees.filter(assignee => this.getFilteredProjectsForAssignee(assignee.id).length > 0 || this.getFilteredBacklogTicketsForAssignee(assignee.id).length > 0);
         },
         getBacklogTicketsForAssignee(assigneeId) {
             return this.backlogTickets.filter(ticket => ticket.assignee_id === assigneeId);
         },
-        priorityColourClass(date, assigneeId) {
-            const priority = this.getHighestPriorityBacklogTicket(date, assigneeId);
-            if (!priority) return {};
-            return { [`highlighted--${priority.name.toLowerCase()}`]: true };
+        getFilteredBacklogTicketsForAssignee(assigneeId) {
+            return this.getBacklogTicketsForAssignee(assigneeId).filter(ticket =>
+                this.selectedProject === '' || ticket.summary.includes(this.selectedProject)
+            );
         },
     },
 };
@@ -269,34 +218,6 @@ th {
         &--red {
             background-color: #e1947e;
         }
-
-        &--backlog {
-            background-color: #b9dcff;
-        }
-
-        &--holidays {
-            background-color: #c0c0c0;
-        }
-
-        &--highest {
-            background-color: #ff0000; // Change color as needed
-        }
-
-        &--high {
-            background-color: #ff4500; // Change color as needed
-        }
-
-        &--medium {
-            background-color: #ff8c00; // Change color as needed
-        }
-
-        &--low {
-            background-color: #ffd700; // Change color as needed
-        }
-
-        &--lowest {
-            background-color: #9acd32; // Change color as needed
-        }
     }
 }
 
@@ -330,46 +251,6 @@ th {
         line-height: 16px;
         position: absolute;
         left: 0;
-    }
-}
-
-.tooltip {
-    position: relative;
-    display: inline-block;
-
-    a {
-        color: white;
-        text-decoration: underline;
-    }
-
-    &--img {
-        filter:
-            drop-shadow( 1px  0px 0px white)
-            drop-shadow(-1px  0px 0px white)
-            drop-shadow( 0px  1px 0px white)
-            drop-shadow( 0px -1px 0px white);
-    }
-
-    .tooltiptext {
-        visibility: hidden;
-        width: 300px;
-        background-color: black;
-        color: #fff;
-        text-align: center;
-        border-radius: 6px;
-        padding: 5px 0;
-        position: absolute;
-        z-index: 1;
-        bottom: 100%;
-        left: 50%;
-        margin-left: -150px;
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-
-    &:hover .tooltiptext {
-        visibility: visible;
-        opacity: 1;
     }
 }
 </style>

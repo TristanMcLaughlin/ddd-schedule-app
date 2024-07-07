@@ -92,7 +92,7 @@ export default {
 };
 </script>
 
-<style  lang="scss">
+<style lang="scss">
     /* Add some basic styling */
     .new-period {
         background-color: #FFFFE0; /* Light yellow for new period selection */
