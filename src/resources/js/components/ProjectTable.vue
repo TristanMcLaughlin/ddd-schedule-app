@@ -29,7 +29,7 @@
                 <tr><td colspan="4"><h2>{{team.name}}</h2></td></tr>
                 <template v-for="assignee in team.assignees" :key="assignee.id">
                     <tr>
-                        <td colspan="4" class="table__assignee">{{ assignee.name }}
+                        <td colspan="4" class="table__assignee"><strong>{{ assignee.name }}</strong>
                             <button @click="toggleAddPeriod(assignee.id)" class="add-date-period__new">➕</button>
                         </td>
                     </tr>
@@ -55,10 +55,8 @@
                         ></td>
                     </tr>
                     <tr v-if="getBacklogTicketsForAssignee(assignee.id).length">
-                        <td colspan="4" class="table__assignee">Backlog Tickets</td>
-                    </tr>
-                    <tr v-if="getBacklogTicketsForAssignee(assignee.id).length">
-                        <td colspan="5"></td>
+                        <td></td>
+                        <td colspan="4" class="project-name">Backlog Tickets</td>
                         <td v-for="date in dateRange" :key="date" :class="{
                             'highlighted': isDateInBacklogRange(date, assignee.id),
                             'is-weekend': isDateAWeekend(date),
@@ -210,6 +208,7 @@ export default {
 
     .project-name, .status {
         min-width: 140px;
+        color: grey;
     }
 
     &__assignee {
@@ -240,6 +239,7 @@ th {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    text-align: left;
 }
 
 .highlighted {
