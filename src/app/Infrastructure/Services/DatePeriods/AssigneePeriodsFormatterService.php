@@ -3,33 +3,28 @@
 namespace App\Infrastructure\Services\DatePeriods;
 
 use App\Domain\Entities\Assignee;
-use App\Domain\Repositories\AssigneeRepository;
+use App\Domain\Repositories\BacklogTicketRepository;
 use App\Domain\Repositories\ProjectRepository;
 use App\Domain\Repositories\TeamRepository;
-use App\Infrastructure\Repositories\EloquentAssigneeRepository;
-use App\Infrastructure\Repositories\EloquentProjectRepository;
 
-class AssigneePeriodsFormatterService
+readonly class AssigneePeriodsFormatterService
 {
-    protected $teamRespository;
-    protected $projectRepository;
-
     public function __construct(
-        TeamRepository $teamRespository,
-        ProjectRepository $projectRepository,
-    ) {
-        $this->teamRespository = $teamRespository;
-        $this->projectRepository = $projectRepository;
-    }
+        protected TeamRepository          $teamRespository,
+        protected ProjectRepository       $projectRepository,
+        protected BacklogTicketRepository $backlogTicketRepository,
+    ) {}
 
     public function formatAssigneePeriods()
     {
         $projects = $this->projectRepository->allFutureProjectsWithDatePeriods();
         $teams = $this->teamRespository->all();
+        $backlogTickets = $this->backlogTicketRepository->list();
 
         $formattedData = [
             'projects' => [],
             'teams' => [],
+            'backlog_tickets' => [],
         ];
 
         // Prepare assignees data
@@ -62,6 +57,16 @@ class AssigneePeriodsFormatterService
                     'assignee_id' => $datePeriod->getAssigneeId(),
                 ];
             }
+        }
+
+        foreach ($backlogTickets as $ticket) {
+            $formattedData['backlog_tickets'][] = [
+                'id' => $ticket->getTicketId(),
+                'assignee_id' => $ticket->getAssigneeId(),
+                'priority' => $ticket->getPriority(),
+                'start_date' => $ticket->getStartDate(),
+                'end_date' => $ticket->getEndDate(),
+            ];
         }
 
         return $formattedData;

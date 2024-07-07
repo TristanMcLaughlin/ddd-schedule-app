@@ -5,6 +5,7 @@ namespace App\Infrastructure\Repositories;
 use App\Domain\Entities\BacklogTicket;
 use App\Domain\Repositories\BacklogTicketRepository;
 use App\Infrastructure\Models\BacklogTicketModel;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class EloquentBacklogTicketRepository implements BacklogTicketRepository
@@ -24,6 +25,6 @@ class EloquentBacklogTicketRepository implements BacklogTicketRepository
 
     public function list(): Collection
     {
-        return BacklogTicketModel::all()->map->toDomainEntity();
+        return BacklogTicketModel::where('end_date', '>=', Carbon::now())->get()->map->toDomainEntity();
     }
 }
