@@ -26,7 +26,7 @@
                 </tr>
                 </thead>
                 <tbody v-for="team in teams">
-                <tr><td colspan="4"><h2>{{team.name}}</h2></td></tr>
+                <tr><td colspan="100%" class="table__team-name"><h2>{{team.name}}</h2></td></tr>
                 <template v-for="assignee in team.assignees" :key="assignee.id">
                     <tr>
                         <td colspan="4" class="table__assignee"><strong>{{ assignee.name }}</strong>
@@ -221,6 +221,15 @@ export default {
     thead {
         position: sticky;
         top: 0;
+        z-index: 1;
+    }
+
+    &__team-name {
+        background-color: darkslategrey;
+        color: white;
+        position: sticky;
+        top: 100px;
+        z-index: 1;
     }
 }
 
@@ -304,10 +313,10 @@ th {
 }
 
 .rotated {
-    height: 120px;
+    height: 90px;
     width: 16px;
     vertical-align: bottom;
-    padding: 8px;
+    padding: 5px 8px;
     margin: 0;
     position: relative;
     min-width: 0;

@@ -85,8 +85,6 @@ body {
 
 .container {
     margin: 0 auto;
-    padding: 50px;
-    padding-top: 140px;
     position: relative;
 }
 </style>
