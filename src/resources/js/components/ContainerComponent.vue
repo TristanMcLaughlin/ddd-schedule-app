@@ -104,10 +104,10 @@ export default {
 </script>
 
 <style lang="scss">
-/* Add some basic styling */
+@import "../styles/app.scss";
 body {
-    font-family: 'Arial', sans-serif;
-    font-size: 12px;
+    font-family: "Lexend", sans-serif;
+    font-size: 14px;
 }
 
 .container {

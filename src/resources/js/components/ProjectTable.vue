@@ -23,7 +23,7 @@
             <tr v-if="!selectedProject"><td colspan="100%" class="table__team-name"><h2>{{team.name}}</h2></td></tr>
             <template v-for="assignee in getFilteredAssignees(team.assignees)" :key="assignee.id">
                 <tr>
-                    <td colspan="4" class="table__assignee"><strong>{{ assignee.name }}</strong>
+                    <td colspan="100%" class="table__assignee"><strong>{{ assignee.name }}</strong>
                         <button @click="toggleAddPeriod(assignee.id)" class="add-date-period__new">➕</button>
                     </td>
                 </tr>
@@ -163,6 +163,9 @@ export default {
 
     &__assignee {
         text-align: left;
+        background: #ECE9E6;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to right, #FFFFFF, #ECE9E6);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to right, #FFFFFF, #ECE9E6); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
     }
 
     thead {
@@ -172,11 +175,13 @@ export default {
     }
 
     &__team-name {
-        background-color: darkslategrey;
         color: white;
         position: sticky;
         top: 100px;
         z-index: 1;
+        background: #0f0c29;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to right, #24243e, #302b63, #0f0c29);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to right, #24243e, #302b63, #0f0c29); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
     }
 }
 
