@@ -1,66 +1,62 @@
 <template>
     <div>
-        <ProjectFilter :projects="projects" @project-filtered="filterProjects" />
-
-        <div>
-            <table class="table">
-                <thead>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Assignee</th>
+                <th class="project-name">Project Name</th>
+                <th>CAM Link</th>
+                <th>RAG</th>
+                <th class="status">Status</th>
+                <th
+                    v-for="date in dateRange"
+                    :key="date"
+                    class="rotated"
+                    :class="{
+                        'is-weekend': isDateAWeekend(date),
+                        'is-today': isDateToday(date),
+                    }"
+                ><span>{{ date }}</span></th>
+            </tr>
+            </thead>
+            <tbody v-for="team in teams">
+            <tr v-if="!selectedProject"><td colspan="100%" class="table__team-name"><h2>{{team.name}}</h2></td></tr>
+            <template v-for="assignee in getFilteredAssignees(team.assignees)" :key="assignee.id">
                 <tr>
-                    <th>Assignee</th>
-                    <th class="project-name">Project Name</th>
-                    <th>CAM Link</th>
-                    <th>RAG</th>
-                    <th class="status">Status</th>
-                    <th
-                        v-for="date in dateRange"
-                        :key="date"
-                        class="rotated"
-                        :class="{
-                            'is-weekend': isDateAWeekend(date),
-                            'is-today': isDateToday(date),
-                        }"
-                    ><span>{{ date }}</span></th>
+                    <td colspan="4" class="table__assignee"><strong>{{ assignee.name }}</strong>
+                        <button @click="toggleAddPeriod(assignee.id)" class="add-date-period__new">➕</button>
+                    </td>
                 </tr>
-                </thead>
-                <tbody v-for="team in teams">
-                <tr v-if="selectedProject === ''"><td colspan="100%" class="table__team-name"><h2>{{team.name}}</h2></td></tr>
-                <template v-for="assignee in getFilteredAssignees(team.assignees)" :key="assignee.id">
-                    <tr>
-                        <td colspan="4" class="table__assignee"><strong>{{ assignee.name }}</strong>
-                            <button @click="toggleAddPeriod(assignee.id)" class="add-date-period__new">➕</button>
-                        </td>
-                    </tr>
-                    <AddDatePeriodWidget
-                        v-if="isAddingPeriod(assignee.id)"
-                        :projects="projects"
-                        :date-range="dateRange"
-                        :assignee-id="assignee.id"
-                        @save-date-period="handleSaveDatePeriod"
-                        @cancel-adding-period="cancelAddingPeriod"
-                    />
-                    <tr v-for="project in getFilteredProjectsForAssignee(assignee.id)" :key="project.id">
-                        <td></td>
-                        <td class="project-name">{{ project.name }}</td>
-                        <td><a :href="`https://opialtd.atlassian.net/browse/${project.id}`" target="_blank">{{ project.id }}</a></td>
-                        <td>{{ project.rag_status }}</td>
-                        <td class="status">{{ project.build_status }}</td>
-                        <td v-for="date in dateRange" :key="date" :class="{
-                            'highlighted': isDateInRange(date, project.date_periods, assignee.id),
-                            'is-weekend': isDateAWeekend(date),
-                            'is-today': isDateToday(date),
-                            ...projectColourClass(project),
-                            }"
-                        ></td>
-                    </tr>
-                    <BacklogTicketsRow
-                        :date-range="dateRange"
-                        :backlog-tickets="getFilteredBacklogTicketsForAssignee(assignee.id)"
-                        :bank-holidays="bankHolidays"
-                    />
-                </template>
-                </tbody>
-            </table>
-        </div>
+                <AddDatePeriodWidget
+                    v-if="isAddingPeriod(assignee.id)"
+                    :projects="projects"
+                    :date-range="dateRange"
+                    :assignee-id="assignee.id"
+                    @save-date-period="handleSaveDatePeriod"
+                    @cancel-adding-period="cancelAddingPeriod"
+                />
+                <tr v-for="project in getFilteredProjectsForAssignee(assignee.id)" :key="project.id">
+                    <td></td>
+                    <td class="project-name">{{ project.name }}</td>
+                    <td><a :href="`https://opialtd.atlassian.net/browse/${project.id}`" target="_blank">{{ project.id }}</a></td>
+                    <td>{{ project.rag_status }}</td>
+                    <td class="status">{{ project.build_status }}</td>
+                    <td v-for="date in dateRange" :key="date" :class="{
+                        'highlighted': isDateInRange(date, project.date_periods, assignee.id),
+                        'is-weekend': isDateAWeekend(date),
+                        'is-today': isDateToday(date),
+                        ...projectColourClass(project),
+                        }"
+                    ></td>
+                </tr>
+                <BacklogTicketsRow
+                    :date-range="dateRange"
+                    :backlog-tickets="getFilteredBacklogTicketsForAssignee(assignee.id)"
+                    :bank-holidays="bankHolidays"
+                />
+            </template>
+            </tbody>
+        </table>
     </div>
 </template>
 
@@ -68,26 +64,20 @@
 import moment from 'moment';
 import AddDatePeriodWidget from './AddDatePeriodWidget.vue';
 import BacklogTicketsRow from './BacklogTicketsRow.vue';
-import ProjectFilter from './ProjectFilter.vue';
 
 export default {
     components: {
         AddDatePeriodWidget,
         BacklogTicketsRow,
-        ProjectFilter,
     },
-    props: ['projects', 'teams', 'dateRange', 'bankHolidays', 'backlogTickets'],
+    props: ['projects', 'teams', 'dateRange', 'bankHolidays', 'backlogTickets', 'selectedProject'],
     data() {
         return {
-            selectedProject: '',
             unavailableStatuses: ['abandoned', 'ended'],
             addingPeriod: null,
         };
     },
     methods: {
-        filterProjects(selectedProject) {
-            this.selectedProject = selectedProject;
-        },
         isDateInRange(date, datePeriods, assigneeId) {
             const current = moment(date);
             return datePeriods.some(period =>
@@ -104,7 +94,7 @@ export default {
         getFilteredProjectsForAssignee(assigneeId) {
             return this.getProjectsForAssignee(assigneeId).filter(project =>
                 !this.unavailableStatuses.includes(project.build_status.toLowerCase()) &&
-                (this.selectedProject === '' || project.name === this.selectedProject)
+                (!this.selectedProject || project.name === this.selectedProject)
             );
         },
         toggleAddPeriod(assigneeId) {
@@ -154,7 +144,7 @@ export default {
         },
         getFilteredBacklogTicketsForAssignee(assigneeId) {
             return this.getBacklogTicketsForAssignee(assigneeId).filter(ticket =>
-                this.selectedProject === '' || ticket.summary.includes(this.selectedProject)
+                !this.selectedProject || ticket.summary.includes(this.selectedProject)
             );
         },
     },
@@ -202,6 +192,8 @@ th {
     background-color: #f9f9f9;
     font-size: 12px;
     min-width: 100px;
+    vertical-align: bottom;
+    padding-bottom: 10px;
 }
 
 .project-name {

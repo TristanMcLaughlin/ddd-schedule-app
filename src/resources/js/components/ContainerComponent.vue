@@ -5,12 +5,14 @@
             :initial-end-date="endDate.format('YYYY-MM-DD')"
             @update-date-range="handleDateRangeUpdate"
         />
+        <ProjectFilter :projects="projectsWithJobCodeNames" @project-filtered="filterProjects" />
         <ProjectTable
             :projects="projectsWithJobCodeNames"
             :teams="teams"
             :date-range="dateRange"
             :bank-holidays="bankHolidays"
             :backlog-tickets="backlogTickets"
+            :selected-project="selectedProject"
             @save-date-period="saveDatePeriod"
             v-if="loaded"
         />
@@ -22,9 +24,11 @@ import axios from 'axios';
 import moment from 'moment';
 import ProjectTable from './ProjectTable.vue';
 import DatePicker from './DatePicker.vue';
+import ProjectFilter from "./ProjectFilter.vue";
 
 export default {
     components: {
+        ProjectFilter,
         ProjectTable,
         DatePicker,
     },
@@ -38,6 +42,7 @@ export default {
             loaded: false,
             startDate: moment(),
             endDate: moment().add(60, 'days'),
+            selectedProject: null,
         };
     },
     async created() {
@@ -90,6 +95,9 @@ export default {
             this.startDate = moment(startDate);
             this.endDate = moment(endDate);
             this.dateRange = this.generateDateRange();
+        },
+        filterProjects(selectedProject) {
+            this.selectedProject = selectedProject;
         },
     },
 };

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="datepicker">
         <label for="start-date">Start Date:</label>
         <input id="start-date" type="date" v-model="startDate" @change="updateDateRange" />
 
@@ -34,7 +34,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 label {
     margin-right: 10px;
 }

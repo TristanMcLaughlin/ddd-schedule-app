@@ -12,15 +12,13 @@
             />
         </td>
         <td colspan="2">
+            <button @click="saveDatePeriod" class="add-date-period__save">💾</button>
+            <button @click="cancelDatePeriod" class="add-date-period__cancel">❌</button>
         </td>
         <td v-for="date in dateRange" :key="date" class="new-period" :class="getCellClass(date)"
             @mousedown="startDateSelection(date)"
             @mouseup="endDateSelection(date)"
             @mouseover="highlightDateSelection(date)"></td>
-        <td>
-            <button @click="saveDatePeriod" class="add-date-period__save">💾</button>
-            <button @click="cancelDatePeriod" class="add-date-period__cancel">❌</button>
-        </td>
     </tr>
 </template>
 
