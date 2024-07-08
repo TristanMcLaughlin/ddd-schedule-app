@@ -1,7 +1,6 @@
 <template>
     <tr class="add-date-period">
-        <td></td>
-        <td>
+        <td colspan="3">
             <v-select
                 :options="projects"
                 label="name"
@@ -11,7 +10,7 @@
                 placeholder="Search for a project..."
             />
         </td>
-        <td colspan="2">
+        <td>
             <button @click="saveDatePeriod" class="add-date-period__save">💾</button>
             <button @click="cancelDatePeriod" class="add-date-period__cancel">❌</button>
         </td>

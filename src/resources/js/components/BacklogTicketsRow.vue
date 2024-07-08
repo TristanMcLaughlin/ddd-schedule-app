@@ -1,6 +1,5 @@
 <template>
     <tr v-if="filteredBacklogTickets.length">
-        <td></td>
         <td colspan="4" class="project-name">Backlog Tickets</td>
         <td v-for="date in dateRange" :key="date" :class="{
                 'highlighted': isDateInBacklogRange(date),
@@ -90,6 +89,8 @@ export default {
     background-color: #4CAF50;
 
     &.highlighted {
+        position: relative;
+
         &--highest {
             background-color: #ff0000; // Change color as needed
         }
@@ -113,8 +114,10 @@ export default {
 }
 
 .tooltip {
-    position: relative;
     display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
 
     a {
         color: white;

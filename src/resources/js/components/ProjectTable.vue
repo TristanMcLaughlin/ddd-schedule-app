@@ -3,11 +3,10 @@
         <table class="table">
             <thead>
             <tr>
-                <th>Assignee</th>
-                <th class="project-name">Project Name</th>
+                <th>Project Name</th>
                 <th>CAM Link</th>
                 <th>RAG</th>
-                <th class="status">Status</th>
+                <th>Status</th>
                 <th
                     v-for="date in dateRange"
                     :key="date"
@@ -36,13 +35,12 @@
                     @cancel-adding-period="cancelAddingPeriod"
                 />
                 <tr v-for="project in getFilteredProjectsForAssignee(assignee.id)" :key="project.id">
-                    <td></td>
                     <td class="project-name">{{ project.name }}</td>
                     <td><a :href="`https://opialtd.atlassian.net/browse/${project.id}`" target="_blank">{{ project.id }}</a></td>
                     <td>{{ project.rag_status }}</td>
                     <td class="status">{{ project.build_status }}</td>
-                    <td v-for="date in dateRange" :key="date" :class="{
-                        'highlighted': isDateInRange(date, project.date_periods, assignee.id),
+                    <td v-for="date in dateRange" :key="date" class="table--date" :class="{
+                        ...isDateInRange(date, project.date_periods, assignee.id),
                         'is-weekend': isDateAWeekend(date),
                         'is-today': isDateToday(date),
                         ...projectColourClass(project),
@@ -80,10 +78,22 @@ export default {
     methods: {
         isDateInRange(date, datePeriods, assigneeId) {
             const current = moment(date);
-            return datePeriods.some(period =>
+            const matchingPeriod = datePeriods.find(period =>
                 period.assignee_id === assigneeId &&
                 current.isBetween(moment(period.start), moment(period.end), 'days', '[]')
             );
+
+            if (matchingPeriod) {
+                const isStart = current.isSame(moment(matchingPeriod.start), 'day');
+                const isEnd = current.isSame(moment(matchingPeriod.end), 'day');
+                return {
+                    highlighted: true,
+                    'highlighted--start': isStart,
+                    'highlighted--end': isEnd,
+                };
+            }
+
+            return {};
         },
         getProjectsForAssignee(assigneeId) {
             const today = moment().startOf('day');
@@ -157,7 +167,7 @@ export default {
     border-collapse: collapse;
 
     .project-name, .status {
-        min-width: 140px;
+        min-width: 150px;
         color: grey;
     }
 
@@ -183,14 +193,16 @@ export default {
         background: -webkit-linear-gradient(to right, #24243e, #302b63, #0f0c29);  /* Chrome 10-25, Safari 5.1-6 */
         background: linear-gradient(to right, #24243e, #302b63, #0f0c29); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
     }
+
+    &--date {
+        padding-left: 18px;
+        padding-top: 18px;
+    }
 }
 
 th, td {
     border: 1px solid #eee;
-    padding: 0;
     text-align: center;
-    width: 18px;
-    height: 18px;
 }
 
 th {
@@ -199,6 +211,7 @@ th {
     min-width: 100px;
     vertical-align: bottom;
     padding-bottom: 10px;
+    border-width: 0;
 }
 
 .project-name {
@@ -214,6 +227,17 @@ th {
 
 .highlighted {
     background-color: #4CAF50;
+    border: 1px dashed rgba(0, 0, 0, 0.1);
+
+    &--start {
+        border-top-left-radius: 100%;
+        border-bottom-left-radius: 100%;
+    }
+
+    &--end {
+        border-top-right-radius: 100%;
+        border-bottom-right-radius: 100%;
+    }
 
     &.highlighted {
         &--green {
@@ -232,6 +256,7 @@ th {
 
 .is-weekend {
     background-color: #D3D3D3 !important;
+    border-radius: 0;
 }
 
 

@@ -108,6 +108,7 @@ export default {
 body {
     font-family: "Lexend", sans-serif;
     font-size: 14px;
+    line-height: 1.2;
 }
 
 .container {
