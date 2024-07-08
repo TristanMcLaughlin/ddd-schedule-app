@@ -1,62 +1,60 @@
 <template>
     <div>
-        <ProjectFilter :projects="projects" @project-filtered="filterProjects" />
-
-        <div>
-            <table class="table">
-                <thead>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Project Name</th>
+                <th>CAM Link</th>
+                <th>RAG</th>
+                <th>Status</th>
+                <th
+                    v-for="date in dateRange"
+                    :key="date"
+                    class="rotated"
+                    :class="{
+                        'is-weekend': isDateAWeekend(date),
+                        'is-today': isDateToday(date),
+                    }"
+                ><span>{{ date }}</span></th>
+            </tr>
+            </thead>
+            <tbody v-for="team in teams">
+            <tr v-if="!selectedProject"><td colspan="100%" class="table__team-name"><h2>{{team.name}}</h2></td></tr>
+            <template v-for="assignee in getFilteredAssignees(team.assignees)" :key="assignee.id">
                 <tr>
-                    <th>Assignee</th>
-                    <th class="project-name">Project Name</th>
-                    <th>CAM Link</th>
-                    <th>RAG</th>
-                    <th class="status">Status</th>
-                    <th
-                        v-for="date in dateRange"
-                        :key="date"
-                        class="rotated"
-                        :class="{'is-weekend': isDateAWeekend(date)}"
-                    ><span>{{ date }}</span></th>
+                    <td colspan="100%" class="table__assignee"><strong>{{ assignee.name }}</strong>
+                        <button @click="toggleAddPeriod(assignee.id)" class="add-date-period__new">➕</button>
+                    </td>
                 </tr>
-                </thead>
-                <tbody v-for="team in teams">
-                <tr v-if="selectedProject === ''"><td colspan="100%" class="table__team-name"><h2>{{team.name}}</h2></td></tr>
-                <template v-for="assignee in getFilteredAssignees(team.assignees)" :key="assignee.id">
-                    <tr>
-                        <td colspan="4" class="table__assignee"><strong>{{ assignee.name }}</strong>
-                            <button @click="toggleAddPeriod(assignee.id)" class="add-date-period__new">➕</button>
-                        </td>
-                    </tr>
-                    <AddDatePeriodWidget
-                        v-if="isAddingPeriod(assignee.id)"
-                        :projects="projects"
-                        :date-range="dateRange"
-                        :assignee-id="assignee.id"
-                        @save-date-period="handleSaveDatePeriod"
-                        @cancel-adding-period="cancelAddingPeriod"
-                    />
-                    <tr v-for="project in getFilteredProjectsForAssignee(assignee.id)" :key="project.id">
-                        <td></td>
-                        <td class="project-name">{{ project.name }}</td>
-                        <td><a :href="`https://opialtd.atlassian.net/browse/${project.id}`" target="_blank">{{ project.id }}</a></td>
-                        <td>{{ project.rag_status }}</td>
-                        <td class="status">{{ project.build_status }}</td>
-                        <td v-for="date in dateRange" :key="date" :class="{
-                            'highlighted': isDateInRange(date, project.date_periods, assignee.id),
-                            'is-weekend': isDateAWeekend(date),
-                            ...projectColourClass(project),
-                            }"
-                        ></td>
-                    </tr>
-                    <BacklogTicketsRow
-                        :date-range="dateRange"
-                        :backlog-tickets="getFilteredBacklogTicketsForAssignee(assignee.id)"
-                        :bank-holidays="bankHolidays"
-                    />
-                </template>
-                </tbody>
-            </table>
-        </div>
+                <AddDatePeriodWidget
+                    v-if="isAddingPeriod(assignee.id)"
+                    :projects="projects"
+                    :date-range="dateRange"
+                    :assignee-id="assignee.id"
+                    @save-date-period="handleSaveDatePeriod"
+                    @cancel-adding-period="cancelAddingPeriod"
+                />
+                <tr v-for="project in getFilteredProjectsForAssignee(assignee.id)" :key="project.id">
+                    <td class="project-name">{{ project.name }}</td>
+                    <td><a :href="`https://opialtd.atlassian.net/browse/${project.id}`" target="_blank">{{ project.id }}</a></td>
+                    <td>{{ project.rag_status }}</td>
+                    <td class="status">{{ project.build_status }}</td>
+                    <td v-for="date in dateRange" :key="date" class="table--date" :class="{
+                        ...isDateInRange(date, project.date_periods, assignee.id),
+                        'is-weekend': isDateAWeekend(date),
+                        'is-today': isDateToday(date),
+                        ...projectColourClass(project),
+                        }"
+                    ></td>
+                </tr>
+                <BacklogTicketsRow
+                    :date-range="dateRange"
+                    :backlog-tickets="getFilteredBacklogTicketsForAssignee(assignee.id)"
+                    :bank-holidays="bankHolidays"
+                />
+            </template>
+            </tbody>
+        </table>
     </div>
 </template>
 
@@ -64,32 +62,38 @@
 import moment from 'moment';
 import AddDatePeriodWidget from './AddDatePeriodWidget.vue';
 import BacklogTicketsRow from './BacklogTicketsRow.vue';
-import ProjectFilter from './ProjectFilter.vue';
 
 export default {
     components: {
         AddDatePeriodWidget,
         BacklogTicketsRow,
-        ProjectFilter,
     },
-    props: ['projects', 'teams', 'dateRange', 'bankHolidays', 'backlogTickets'],
+    props: ['projects', 'teams', 'dateRange', 'bankHolidays', 'backlogTickets', 'selectedProject'],
     data() {
         return {
-            selectedProject: '',
             unavailableStatuses: ['abandoned', 'ended'],
             addingPeriod: null,
         };
     },
     methods: {
-        filterProjects(selectedProject) {
-            this.selectedProject = selectedProject;
-        },
         isDateInRange(date, datePeriods, assigneeId) {
             const current = moment(date);
-            return datePeriods.some(period =>
+            const matchingPeriod = datePeriods.find(period =>
                 period.assignee_id === assigneeId &&
                 current.isBetween(moment(period.start), moment(period.end), 'days', '[]')
             );
+
+            if (matchingPeriod) {
+                const isStart = current.isSame(moment(matchingPeriod.start), 'day');
+                const isEnd = current.isSame(moment(matchingPeriod.end), 'day');
+                return {
+                    highlighted: true,
+                    'highlighted--start': isStart,
+                    'highlighted--end': isEnd,
+                };
+            }
+
+            return {};
         },
         getProjectsForAssignee(assigneeId) {
             const today = moment().startOf('day');
@@ -100,7 +104,7 @@ export default {
         getFilteredProjectsForAssignee(assigneeId) {
             return this.getProjectsForAssignee(assigneeId).filter(project =>
                 !this.unavailableStatuses.includes(project.build_status.toLowerCase()) &&
-                (this.selectedProject === '' || project.name === this.selectedProject)
+                (!this.selectedProject || project.name === this.selectedProject)
             );
         },
         toggleAddPeriod(assigneeId) {
@@ -120,6 +124,10 @@ export default {
             const current = moment(date);
             return [6, 0].includes(current.day()) ||
                 this.bankHolidays.includes(current.format('YYYY-MM-DD'));
+        },
+        isDateToday(date) {
+            const current = moment();
+            return current.format('YYYY-MM-DD') === date;
         },
         projectColourClass(project) {
             const map = {
@@ -146,7 +154,7 @@ export default {
         },
         getFilteredBacklogTicketsForAssignee(assigneeId) {
             return this.getBacklogTicketsForAssignee(assigneeId).filter(ticket =>
-                this.selectedProject === '' || ticket.summary.includes(this.selectedProject)
+                !this.selectedProject || ticket.summary.includes(this.selectedProject)
             );
         },
     },
@@ -159,41 +167,52 @@ export default {
     border-collapse: collapse;
 
     .project-name, .status {
-        min-width: 140px;
+        min-width: 150px;
         color: grey;
     }
 
     &__assignee {
         text-align: left;
+        background: #ECE9E6;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to right, #FFFFFF, #ECE9E6);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to right, #FFFFFF, #ECE9E6); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
     }
 
     thead {
         position: sticky;
         top: 0;
         z-index: 1;
+        background: white;
     }
 
     &__team-name {
-        background-color: darkslategrey;
         color: white;
         position: sticky;
         top: 100px;
         z-index: 1;
+        background: linear-gradient(to right, #11998e, #38ef7d); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        text-align: left;
+    }
+
+    &--date {
+        padding-left: 18px;
+        padding-top: 18px;
     }
 }
 
 th, td {
-    border: 1px solid #eee;
-    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     text-align: center;
-    width: 18px;
-    height: 18px;
+    padding-left: 10px;
 }
 
 th {
     background-color: #f9f9f9;
     font-size: 12px;
     min-width: 100px;
+    vertical-align: bottom;
+    padding-bottom: 10px;
+    border-width: 0;
 }
 
 .project-name {
@@ -203,27 +222,43 @@ th {
     text-align: left;
 }
 
+.is-today {
+    background-color: rgba(0,188,120,0.3);
+}
+
 .highlighted {
-    background-color: #4CAF50;
+    background-color: #16c557;
+
+    &--start {
+        border-top-left-radius: 100%;
+        border-bottom-left-radius: 100%;
+    }
+
+    &--end {
+        border-top-right-radius: 100%;
+        border-bottom-right-radius: 100%;
+    }
 
     &.highlighted {
         &--green {
-            background-color: #75be51;
+            background-color: #16c557;
         }
 
         &--amber {
-            background-color: #e5d58b;
+            background-color: #ffc94a;
         }
 
         &--red {
-            background-color: #e1947e;
+            background-color: #ff855e;
         }
     }
 }
 
 .is-weekend {
     background-color: #D3D3D3 !important;
+    border-radius: 0;
 }
+
 
 .new-period-cell {
     background-color: #FFFFE0;

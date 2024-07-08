@@ -32,8 +32,16 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss">
 .v-select {
-    width: 300px;
+    --vs-font-size: 14px;
+    --vs-controls-size: 0.8;
+
+    font-size: 12px;
+    width: 200px;
+
+    input {
+        font-family: "Lexend", sans-serif;
+    }
 }
 </style>

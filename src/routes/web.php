@@ -9,6 +9,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('api/projects', [ProjectController::class, 'getFormattedData']);
+Route::post('api/projects', [ProjectController::class, 'getFormattedData']);
 Route::post('api/projects/{projectId}/date-periods', [CustomDatePeriodController::class, 'store']);
 Route::get('api/bank-holidays', [BankHolidayController::class, 'index']);

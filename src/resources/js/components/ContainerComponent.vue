@@ -1,11 +1,20 @@
 <template>
     <div class="container">
+        <div class="filters">
+            <DatePicker
+                :initial-start-date="startDate.format('YYYY-MM-DD')"
+                :initial-end-date="endDate.format('YYYY-MM-DD')"
+                @update-date-range="handleDateRangeUpdate"
+            />
+            <ProjectFilter :projects="projectsWithJobCodeNames" @project-filtered="filterProjects" />
+        </div>
         <ProjectTable
             :projects="projectsWithJobCodeNames"
             :teams="teams"
             :date-range="dateRange"
             :bank-holidays="bankHolidays"
             :backlog-tickets="backlogTickets"
+            :selected-project="selectedProject"
             @save-date-period="saveDatePeriod"
             v-if="loaded"
         />
@@ -16,10 +25,14 @@
 import axios from 'axios';
 import moment from 'moment';
 import ProjectTable from './ProjectTable.vue';
+import DatePicker from './DatePicker.vue';
+import ProjectFilter from "./ProjectFilter.vue";
 
 export default {
     components: {
-        ProjectTable
+        ProjectFilter,
+        ProjectTable,
+        DatePicker,
     },
     data() {
         return {
@@ -27,12 +40,18 @@ export default {
             teams: [],
             bankHolidays: [],
             backlogTickets: [],
-            dateRange: this.generateDateRange(),
+            dateRange: [],
             loaded: false,
+            startDate: moment(),
+            endDate: moment().add(60, 'days'),
+            selectedProject: null,
         };
     },
-    created() {
-        this.fetchData();
+    async created() {
+        await this.fetchData();
+        await this.fetchBankHolidays();
+        this.dateRange = this.generateDateRange();
+        this.loaded = true;
     },
     computed: {
       projectsWithJobCodeNames() {
@@ -41,19 +60,22 @@ export default {
     },
     methods: {
         async fetchData() {
-            const response = await axios.get('/api/projects');
+            const response = await axios.post('/api/projects', {
+                start_date: new moment(this.startDate).subtract(30, 'days').format('YYYY-MM-DD'),
+                end_date: this.endDate.format('YYYY-MM-DD')
+            });
+
             this.projects = Object.values(response.data.projects);
             this.teams = Object.values(response.data.teams);
             this.backlogTickets = Object.values(response.data.backlog_tickets);
-
+        },
+        async fetchBankHolidays() {
             const bankHolidays = await axios.get('/api/bank-holidays');
             this.bankHolidays = bankHolidays.data.map(bh => bh.date);
-
-            this.loaded = true;
         },
         generateDateRange() {
-            const start = moment();
-            const end = moment().add(45, 'days');
+            const start = moment(this.startDate);
+            const end = moment(this.endDate);
             const range = [];
 
             while (start.isBefore(end)) {
@@ -71,19 +93,42 @@ export default {
                 console.error('Error saving date period:', error.response.data);
             }
         },
+        handleDateRangeUpdate({ startDate, endDate }) {
+            this.startDate = moment(startDate);
+            this.endDate = moment(endDate);
+            this.dateRange = this.generateDateRange();
+        },
+        filterProjects(selectedProject) {
+            this.selectedProject = selectedProject;
+        },
     },
 };
 </script>
 
 <style lang="scss">
-/* Add some basic styling */
+@import "../styles/app.scss";
 body {
-    font-family: 'Arial', sans-serif;
-    font-size: 12px;
+    font-family: "Lexend", sans-serif;
+    font-size: 14px;
+    line-height: 1.2;
+    padding: 0;
+    margin: 0;
+}
+
+h2 {
+    font-weight: 600;
+    font-size: 16px;
 }
 
 .container {
     margin: 0 auto;
     position: relative;
+}
+
+.filters {
+    position: fixed;
+    z-index: 2;
+    display: flex;
+    padding: 10px;
 }
 </style>

@@ -1,14 +1,14 @@
 <template>
     <tr v-if="filteredBacklogTickets.length">
-        <td></td>
         <td colspan="4" class="project-name">Backlog Tickets</td>
         <td v-for="date in dateRange" :key="date" :class="{
                 'highlighted': isDateInBacklogRange(date),
                 'is-weekend': isDateAWeekend(date),
+                'is-today': isDateToday(date),
                 ...priorityColourClass(date)
             }">
             <span v-if="isDateInBacklogRange(date)" class="tooltip">
-                <img :src="getHighestPriorityBacklogTicket(date)?.icon" height="16" width="16" class="tooltip--img">
+                <img :src="getHighestPriorityBacklogTicket(date)?.icon" height="17" width="17" class="tooltip--img">
                 <span class="tooltiptext">
                     <div v-for="ticket in getBacklogTicketsOnDate(date)" :key="ticket.id">
                         <a :href="`https://opialtd.atlassian.net/browse/${ticket.id}`" target="_blank">
@@ -75,7 +75,11 @@ export default {
         isDateAWeekend(date) {
             const current = moment(date);
             return [6, 0].includes(current.day()) || this.bankHolidays.includes(current.format('YYYY-MM-DD'));
-        }
+        },
+        isDateToday(date) {
+            const current = moment();
+            return current.format('YYYY-MM-DD') === date;
+        },
     }
 };
 </script>
@@ -85,6 +89,8 @@ export default {
     background-color: #4CAF50;
 
     &.highlighted {
+        position: relative;
+
         &--highest {
             background-color: #ff0000; // Change color as needed
         }
@@ -108,8 +114,10 @@ export default {
 }
 
 .tooltip {
-    position: relative;
     display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
 
     a {
         color: white;
@@ -122,6 +130,9 @@ export default {
             drop-shadow(-1px  0px 0px white)
             drop-shadow( 0px  1px 0px white)
             drop-shadow( 0px -1px 0px white);
+        position: relative;
+        top: 1px;
+        left: 1px;
     }
 
     .tooltiptext {

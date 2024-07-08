@@ -3,6 +3,8 @@
 namespace App\Application\Http\Controllers;
 
 use App\Infrastructure\Services\DatePeriods\AssigneePeriodsFormatterService;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class ProjectController
 {
@@ -13,9 +15,14 @@ class ProjectController
         $this->assigneePeriodsFormatterService = $assigneePeriodsFormatterService;
     }
 
-    public function getFormattedData()
+    public function getFormattedData(Request $request)
     {
-        $data = $this->assigneePeriodsFormatterService->formatAssigneePeriods();
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $startDate = $startDate ? Carbon::createFromFormat('Y-m-d', $startDate) : Carbon::now();
+        $endDate = $endDate ? Carbon::createFromFormat('Y-m-d', $endDate) : Carbon::now()->addDays(60);
+
+        $data = $this->assigneePeriodsFormatterService->formatAssigneePeriods($startDate, $endDate);
         return response()->json($data);
     }
 }

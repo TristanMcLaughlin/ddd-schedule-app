@@ -1,7 +1,6 @@
 <template>
     <tr class="add-date-period">
-        <td></td>
-        <td>
+        <td colspan="3">
             <v-select
                 :options="projects"
                 label="name"
@@ -11,16 +10,14 @@
                 placeholder="Search for a project..."
             />
         </td>
-        <td colspan="2">
+        <td>
+            <button @click="saveDatePeriod" class="add-date-period__save">💾</button>
+            <button @click="cancelDatePeriod" class="add-date-period__cancel">❌</button>
         </td>
         <td v-for="date in dateRange" :key="date" class="new-period" :class="getCellClass(date)"
             @mousedown="startDateSelection(date)"
             @mouseup="endDateSelection(date)"
             @mouseover="highlightDateSelection(date)"></td>
-        <td>
-            <button @click="saveDatePeriod" class="add-date-period__save">💾</button>
-            <button @click="cancelDatePeriod" class="add-date-period__cancel">❌</button>
-        </td>
     </tr>
 </template>
 
