@@ -23,6 +23,10 @@ class BankHolidayImportService
         $data = json_decode($response->getBody()->getContents(), true);
 
         foreach ($data as $region => $holidays) {
+            if ($region !== 'england-and-wales') {
+                continue;
+            }
+
             foreach ($holidays['events'] as $event) {
                 $bankHoliday = new BankHoliday($event['date']);
                 $this->repository->save($bankHoliday);
