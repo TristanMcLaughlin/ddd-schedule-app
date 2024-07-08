@@ -211,6 +211,10 @@ th {
     text-align: left;
 }
 
+.is-today {
+    background-color: #feffd4;
+}
+
 .highlighted {
     background-color: #4CAF50;
 
@@ -233,9 +237,6 @@ th {
     background-color: #D3D3D3 !important;
 }
 
-.is-today {
-    background-color: #feffd4;
-}
 
 .new-period-cell {
     background-color: #FFFFE0;

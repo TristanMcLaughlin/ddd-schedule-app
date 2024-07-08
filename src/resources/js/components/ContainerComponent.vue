@@ -67,7 +67,6 @@ export default {
             this.bankHolidays = bankHolidays.data.map(bh => bh.date);
         },
         generateDateRange() {
-            console.log(this.startDate)
             const start = moment(this.startDate);
             const end = moment(this.endDate);
             const range = [];
