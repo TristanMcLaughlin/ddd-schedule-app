@@ -1,5 +1,10 @@
 <template>
     <div class="container">
+        <DatePicker
+            :initial-start-date="startDate.format('YYYY-MM-DD')"
+            :initial-end-date="endDate.format('YYYY-MM-DD')"
+            @update-date-range="handleDateRangeUpdate"
+        />
         <ProjectTable
             :projects="projectsWithJobCodeNames"
             :teams="teams"
@@ -16,10 +21,12 @@
 import axios from 'axios';
 import moment from 'moment';
 import ProjectTable from './ProjectTable.vue';
+import DatePicker from './DatePicker.vue';
 
 export default {
     components: {
-        ProjectTable
+        ProjectTable,
+        DatePicker,
     },
     data() {
         return {
@@ -47,7 +54,7 @@ export default {
     methods: {
         async fetchData() {
             const response = await axios.post('/api/projects', {
-                start_date: this.startDate.format('YYYY-MM-DD'),
+                start_date: new moment(this.startDate).subtract(30, 'days').format('YYYY-MM-DD'),
                 end_date: this.endDate.format('YYYY-MM-DD')
             });
 
@@ -79,6 +86,11 @@ export default {
             } catch (error) {
                 console.error('Error saving date period:', error.response.data);
             }
+        },
+        handleDateRangeUpdate({ startDate, endDate }) {
+            this.startDate = moment(startDate);
+            this.endDate = moment(endDate);
+            this.dateRange = this.generateDateRange();
         },
     },
 };
