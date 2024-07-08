@@ -15,7 +15,10 @@
                         v-for="date in dateRange"
                         :key="date"
                         class="rotated"
-                        :class="{'is-weekend': isDateAWeekend(date)}"
+                        :class="{
+                            'is-weekend': isDateAWeekend(date),
+                            'is-today': isDateToday(date),
+                        }"
                     ><span>{{ date }}</span></th>
                 </tr>
                 </thead>
@@ -44,6 +47,7 @@
                         <td v-for="date in dateRange" :key="date" :class="{
                             'highlighted': isDateInRange(date, project.date_periods, assignee.id),
                             'is-weekend': isDateAWeekend(date),
+                            'is-today': isDateToday(date),
                             ...projectColourClass(project),
                             }"
                         ></td>
@@ -120,6 +124,10 @@ export default {
             const current = moment(date);
             return [6, 0].includes(current.day()) ||
                 this.bankHolidays.includes(current.format('YYYY-MM-DD'));
+        },
+        isDateToday(date) {
+            const current = moment();
+            return current.format('YYYY-MM-DD') === date;
         },
         projectColourClass(project) {
             const map = {
@@ -223,6 +231,10 @@ th {
 
 .is-weekend {
     background-color: #D3D3D3 !important;
+}
+
+.is-today {
+    background-color: #feffd4;
 }
 
 .new-period-cell {

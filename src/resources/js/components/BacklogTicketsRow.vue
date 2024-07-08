@@ -5,6 +5,7 @@
         <td v-for="date in dateRange" :key="date" :class="{
                 'highlighted': isDateInBacklogRange(date),
                 'is-weekend': isDateAWeekend(date),
+                'is-today': isDateToday(date),
                 ...priorityColourClass(date)
             }">
             <span v-if="isDateInBacklogRange(date)" class="tooltip">
@@ -75,7 +76,11 @@ export default {
         isDateAWeekend(date) {
             const current = moment(date);
             return [6, 0].includes(current.day()) || this.bankHolidays.includes(current.format('YYYY-MM-DD'));
-        }
+        },
+        isDateToday(date) {
+            const current = moment();
+            return current.format('YYYY-MM-DD') === date;
+        },
     }
 };
 </script>
