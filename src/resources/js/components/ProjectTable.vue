@@ -182,6 +182,7 @@ export default {
         position: sticky;
         top: 0;
         z-index: 1;
+        background: white;
     }
 
     &__team-name {
@@ -222,7 +223,7 @@ th {
 }
 
 .is-today {
-    background-color: #feffd4;
+    background-color: rgba(0,188,120,0.3);
 }
 
 .highlighted {
