@@ -8,7 +8,7 @@
                 ...priorityColourClass(date)
             }">
             <span v-if="isDateInBacklogRange(date)" class="tooltip">
-                <img :src="getHighestPriorityBacklogTicket(date)?.icon" height="16" width="16" class="tooltip--img">
+                <img :src="getHighestPriorityBacklogTicket(date)?.icon" height="17" width="17" class="tooltip--img">
                 <span class="tooltiptext">
                     <div v-for="ticket in getBacklogTicketsOnDate(date)" :key="ticket.id">
                         <a :href="`https://opialtd.atlassian.net/browse/${ticket.id}`" target="_blank">
@@ -130,6 +130,9 @@ export default {
             drop-shadow(-1px  0px 0px white)
             drop-shadow( 0px  1px 0px white)
             drop-shadow( 0px -1px 0px white);
+        position: relative;
+        top: 1px;
+        left: 1px;
     }
 
     .tooltiptext {

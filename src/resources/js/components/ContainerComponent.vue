@@ -110,6 +110,10 @@ body {
     font-size: 14px;
     line-height: 1.2;
 }
+h2 {
+    font-weight: 600;
+    font-size: 16px;
+}
 
 .container {
     margin: 0 auto;

@@ -189,9 +189,8 @@ export default {
         position: sticky;
         top: 100px;
         z-index: 1;
-        background: #0f0c29;  /* fallback for old browsers */
-        background: -webkit-linear-gradient(to right, #24243e, #302b63, #0f0c29);  /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(to right, #24243e, #302b63, #0f0c29); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+        text-align: left;
     }
 
     &--date {
@@ -201,8 +200,9 @@ export default {
 }
 
 th, td {
-    border: 1px solid #eee;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     text-align: center;
+    padding-left: 10px;
 }
 
 th {
@@ -226,8 +226,7 @@ th {
 }
 
 .highlighted {
-    background-color: #4CAF50;
-    border: 1px dashed rgba(0, 0, 0, 0.1);
+    background-color: #16c557;
 
     &--start {
         border-top-left-radius: 100%;
@@ -241,15 +240,15 @@ th {
 
     &.highlighted {
         &--green {
-            background-color: #75be51;
+            background-color: #16c557;
         }
 
         &--amber {
-            background-color: #e5d58b;
+            background-color: #ffc94a;
         }
 
         &--red {
-            background-color: #e1947e;
+            background-color: #ff855e;
         }
     }
 }
