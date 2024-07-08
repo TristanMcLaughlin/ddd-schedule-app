@@ -1,9 +1,6 @@
 <template>
     <div class="datepicker">
-        <label for="start-date">Start:</label>
-        <input id="start-date" type="date" v-model="startDate" @change="updateDateRange" />
-
-        <label for="end-date">End:</label>
+        <input id="start-date" type="date" v-model="startDate" @change="updateDateRange" /> -
         <input id="end-date" type="date" v-model="endDate" @change="updateDateRange" />
     </div>
 </template>
@@ -35,13 +32,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-label {
-    margin-right: 10px;
-}
-
 input {
     font-family: "Lexend", sans-serif;
-    margin-bottom: 10px;
-    margin-right: 20px;
+    margin: 0 5px;
+    padding: 5px;
+    border: var(--vs-border-width) var(--vs-border-style) var(--vs-border-color);
+    border-radius: var(--vs-border-radius);
 }
 </style>

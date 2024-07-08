@@ -189,7 +189,7 @@ export default {
         position: sticky;
         top: 100px;
         z-index: 1;
-        background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+        background: linear-gradient(to right, #11998e, #38ef7d); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
         text-align: left;
     }
 

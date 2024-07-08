@@ -128,5 +128,7 @@ h2 {
 .filters {
     position: fixed;
     z-index: 2;
+    display: flex;
+    padding: 10px;
 }
 </style>
