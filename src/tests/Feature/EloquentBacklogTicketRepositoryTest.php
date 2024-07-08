@@ -29,6 +29,7 @@ class EloquentBacklogTicketRepositoryTest extends TestCase
             'Test',
             '2024-03-01',
             '2024-03-05',
+            'status,'
         );
 
         $this->repository->save($backlogTicket);
@@ -52,6 +53,7 @@ class EloquentBacklogTicketRepositoryTest extends TestCase
             'Test',
             '2024-03-01',
             '2024-03-05',
+            'status,'
         );
 
         $backlogTicket2 = new BacklogTicket(
@@ -61,6 +63,7 @@ class EloquentBacklogTicketRepositoryTest extends TestCase
             'Test',
             '2024-04-01',
             '2024-04-05',
+            'status,'
         );
 
         $this->repository->save($backlogTicket1);
