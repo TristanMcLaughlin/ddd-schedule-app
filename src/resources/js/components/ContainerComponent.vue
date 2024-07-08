@@ -1,11 +1,13 @@
 <template>
     <div class="container">
-        <DatePicker
-            :initial-start-date="startDate.format('YYYY-MM-DD')"
-            :initial-end-date="endDate.format('YYYY-MM-DD')"
-            @update-date-range="handleDateRangeUpdate"
-        />
-        <ProjectFilter :projects="projectsWithJobCodeNames" @project-filtered="filterProjects" />
+        <div class="filters">
+            <DatePicker
+                :initial-start-date="startDate.format('YYYY-MM-DD')"
+                :initial-end-date="endDate.format('YYYY-MM-DD')"
+                @update-date-range="handleDateRangeUpdate"
+            />
+            <ProjectFilter :projects="projectsWithJobCodeNames" @project-filtered="filterProjects" />
+        </div>
         <ProjectTable
             :projects="projectsWithJobCodeNames"
             :teams="teams"
@@ -109,7 +111,10 @@ body {
     font-family: "Lexend", sans-serif;
     font-size: 14px;
     line-height: 1.2;
+    padding: 0;
+    margin: 0;
 }
+
 h2 {
     font-weight: 600;
     font-size: 16px;
@@ -118,5 +123,10 @@ h2 {
 .container {
     margin: 0 auto;
     position: relative;
+}
+
+.filters {
+    position: fixed;
+    z-index: 2;
 }
 </style>

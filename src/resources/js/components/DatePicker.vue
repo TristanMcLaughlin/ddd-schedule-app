@@ -1,9 +1,9 @@
 <template>
     <div class="datepicker">
-        <label for="start-date">Start Date:</label>
+        <label for="start-date">Start:</label>
         <input id="start-date" type="date" v-model="startDate" @change="updateDateRange" />
 
-        <label for="end-date">End Date:</label>
+        <label for="end-date">End:</label>
         <input id="end-date" type="date" v-model="endDate" @change="updateDateRange" />
     </div>
 </template>
@@ -40,6 +40,7 @@ label {
 }
 
 input {
+    font-family: "Lexend", sans-serif;
     margin-bottom: 10px;
     margin-right: 20px;
 }
