@@ -20,12 +20,13 @@ class EloquentBacklogTicketRepository implements BacklogTicketRepository
                 'summary' => $backlogTicket->getSummary(),
                 'start_date' => $backlogTicket->getStartDate(),
                 'end_date' => $backlogTicket->getEndDate(),
+                'status' => $backlogTicket->getStatus(),
             ]
         );
     }
 
     public function list(): Collection
     {
-        return BacklogTicketModel::where('end_date', '>=', Carbon::now())->get()->map->toDomainEntity();
+        return BacklogTicketModel::where('end_date', '>=', Carbon::now())->whereNotIn('status', ['Abandoned', 'Done'])->get()->map->toDomainEntity();
     }
 }
