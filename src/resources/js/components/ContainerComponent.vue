@@ -113,11 +113,14 @@ body {
     line-height: 1.2;
     padding: 0;
     margin: 0;
+    background: #353538;
 }
 
 h2 {
     font-weight: 600;
     font-size: 16px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .container {
@@ -128,5 +131,9 @@ h2 {
 .filters {
     position: fixed;
     z-index: 2;
+    display: flex;
+    padding: 10px;
+    border-bottom-right-radius: 20px;
+    background: darkslategrey;
 }
 </style>

@@ -92,10 +92,10 @@ export default {
 <style lang="scss">
     /* Add some basic styling */
     .new-period {
-        background-color: #FFFFE0; /* Light yellow for new period selection */
+        background-color: rgba(0,188,128,0.3); /* Light yellow for new period selection */
 
         &--highlighted {
-            background-color: #FFD700; /* Darker yellow for currently highlighted period */
+            background-color: rgba(0,188,128,1); /* Darker yellow for currently highlighted period */
         }
     }
 

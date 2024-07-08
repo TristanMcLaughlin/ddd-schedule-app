@@ -37,7 +37,7 @@
                 <tr v-for="project in getFilteredProjectsForAssignee(assignee.id)" :key="project.id">
                     <td class="project-name">{{ project.name }}</td>
                     <td><a :href="`https://opialtd.atlassian.net/browse/${project.id}`" target="_blank">{{ project.id }}</a></td>
-                    <td>{{ project.rag_status }}</td>
+                    <td class="table__rag-status">{{ project.rag_status }}</td>
                     <td class="status">{{ project.build_status }}</td>
                     <td v-for="date in dateRange" :key="date" class="table--date" :class="{
                         ...isDateInRange(date, project.date_periods, assignee.id),
@@ -164,24 +164,32 @@ export default {
 <style lang="scss">
 .table {
     width: 100%;
+    color: white;
     border-collapse: collapse;
 
     .project-name, .status {
         min-width: 150px;
-        color: grey;
+        color: #92989f;
+    }
+
+    &__rag-status {
+        color: #92989f;
+    }
+
+    a {
+        color: #008d93;
     }
 
     &__assignee {
         text-align: left;
-        background: #ECE9E6;  /* fallback for old browsers */
-        background: -webkit-linear-gradient(to right, #FFFFFF, #ECE9E6);  /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(to right, #FFFFFF, #ECE9E6); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        background: rgba(0,0,0,0.4);
     }
 
     thead {
         position: sticky;
         top: 0;
         z-index: 1;
+        background: linear-gradient(to right, #232526, #414345); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
     }
 
     &__team-name {
@@ -189,7 +197,7 @@ export default {
         position: sticky;
         top: 100px;
         z-index: 1;
-        background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+        background: linear-gradient(to right, #11998e, #38ef7d); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
         text-align: left;
     }
 
@@ -200,13 +208,12 @@ export default {
 }
 
 th, td {
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.3);
     text-align: center;
     padding-left: 10px;
 }
 
 th {
-    background-color: #f9f9f9;
     font-size: 12px;
     min-width: 100px;
     vertical-align: bottom;
@@ -222,7 +229,7 @@ th {
 }
 
 .is-today {
-    background-color: #feffd4;
+    background-color: rgba(0,188,128,0.3);
 }
 
 .highlighted {
@@ -254,7 +261,7 @@ th {
 }
 
 .is-weekend {
-    background-color: #D3D3D3 !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
     border-radius: 0;
 }
 
