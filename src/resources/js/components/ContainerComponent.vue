@@ -27,12 +27,17 @@ export default {
             teams: [],
             bankHolidays: [],
             backlogTickets: [],
-            dateRange: this.generateDateRange(),
+            dateRange: [],
             loaded: false,
+            startDate: moment(),
+            endDate: moment().add(60, 'days'),
         };
     },
-    created() {
-        this.fetchData();
+    async created() {
+        await this.fetchData();
+        await this.fetchBankHolidays();
+        this.dateRange = this.generateDateRange();
+        this.loaded = true;
     },
     computed: {
       projectsWithJobCodeNames() {
@@ -41,19 +46,23 @@ export default {
     },
     methods: {
         async fetchData() {
-            const response = await axios.get('/api/projects');
+            const response = await axios.post('/api/projects', {
+                start_date: this.startDate.format('YYYY-MM-DD'),
+                end_date: this.endDate.format('YYYY-MM-DD')
+            });
+
             this.projects = Object.values(response.data.projects);
             this.teams = Object.values(response.data.teams);
             this.backlogTickets = Object.values(response.data.backlog_tickets);
-
+        },
+        async fetchBankHolidays() {
             const bankHolidays = await axios.get('/api/bank-holidays');
             this.bankHolidays = bankHolidays.data.map(bh => bh.date);
-
-            this.loaded = true;
         },
         generateDateRange() {
-            const start = moment();
-            const end = moment().add(45, 'days');
+            console.log(this.startDate)
+            const start = moment(this.startDate);
+            const end = moment(this.endDate);
             const range = [];
 
             while (start.isBefore(end)) {

@@ -33,12 +33,10 @@ class EloquentProjectRepository implements ProjectRepository
         $projectModel->datePeriods()->where('imported_from_jira', true)->delete();
     }
 
-    public function allFutureProjectsWithDatePeriods()
+    public function projectsWithDatePeriodRange(Carbon $startDate, Carbon $endDate)
     {
         return ProjectModel::where('build_status', '!=', 'Abandoned')
-        ->whereHas('datePeriods', function ($query) {
-            $query->where('end_date', '>', Carbon::today());
-        })
+            ->whereHas('datePeriods', fn ($query) => $query->whereBetween('end_date', [$startDate, $endDate]))
             ->with('datePeriods')->get()->map->toDomainEntity();
     }
 }

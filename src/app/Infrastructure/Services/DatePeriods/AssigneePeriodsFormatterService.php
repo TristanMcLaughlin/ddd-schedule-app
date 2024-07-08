@@ -6,6 +6,7 @@ use App\Domain\Entities\Assignee;
 use App\Domain\Repositories\BacklogTicketRepository;
 use App\Domain\Repositories\ProjectRepository;
 use App\Domain\Repositories\TeamRepository;
+use Carbon\Carbon;
 
 readonly class AssigneePeriodsFormatterService
 {
@@ -15,9 +16,9 @@ readonly class AssigneePeriodsFormatterService
         protected BacklogTicketRepository $backlogTicketRepository,
     ) {}
 
-    public function formatAssigneePeriods()
+    public function formatAssigneePeriods(Carbon $startDate, Carbon $endDate)
     {
-        $projects = $this->projectRepository->allFutureProjectsWithDatePeriods();
+        $projects = $this->projectRepository->projectsWithDatePeriodRange($startDate, $endDate);
         $teams = $this->teamRespository->all();
         $backlogTickets = $this->backlogTicketRepository->list();
 
