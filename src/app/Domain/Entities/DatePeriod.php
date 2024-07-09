@@ -12,7 +12,8 @@ readonly class DatePeriod implements Arrayable
         private string $assigneeId,
         private string $startDate,
         private string $endDate,
-        private bool $importedFromJira
+        private bool $importedFromJira,
+        private ?string $description,
     ) {}
 
     public function getId(): string
@@ -45,6 +46,11 @@ readonly class DatePeriod implements Arrayable
         return $this->importedFromJira;
     }
 
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
     public function toArray(): array
     {
         return [
@@ -54,6 +60,7 @@ readonly class DatePeriod implements Arrayable
             'start_date' => $this->getStartDate(),
             'end_date' => $this->getEndDate(),
             'imported_from_jira' => $this->isImportedFromJira(),
+            'description' => $this->getDescription(),
         ];
     }
 }

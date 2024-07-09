@@ -21,6 +21,7 @@ class PMDatePeriodStrategy extends BaseDatePeriodStrategy
         $this->assignee = $epic['fields']['customfield_10112']['accountId'] ?? 'unassigned-pm';
         $this->startDate = $pmStartDate;
         $this->endDate = $pmDueDate;
+        $this->description = 'PM Review';
 
         return $this->getDatePeriod();
     }

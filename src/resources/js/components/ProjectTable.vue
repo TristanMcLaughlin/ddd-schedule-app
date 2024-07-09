@@ -45,6 +45,7 @@
                         'is-today': isDateToday(date),
                         ...projectColourClass(project),
                         }"
+                        :title="getDescription(date, project.date_periods, assignee.id)"
                     ></td>
                 </tr>
                 <BacklogTicketsRow
@@ -90,6 +91,7 @@ export default {
                     highlighted: true,
                     'highlighted--start': isStart,
                     'highlighted--end': isEnd,
+                    'highlighted--launch': matchingPeriod.description === 'Launch',
                 };
             }
 
@@ -157,6 +159,15 @@ export default {
                 !this.selectedProject || ticket.summary.includes(this.selectedProject)
             );
         },
+        getDescription(date, datePeriods, assigneeId) {
+            const current = moment(date);
+            const matchingPeriod = datePeriods.find(period =>
+                period.assignee_id === assigneeId &&
+                current.isBetween(moment(period.start), moment(period.end), 'days', '[]')
+            );
+
+            return matchingPeriod?.description ?? null;
+        },
     },
 };
 </script>
@@ -167,7 +178,7 @@ export default {
     border-collapse: collapse;
 
     .project-name, .status {
-        min-width: 150px;
+        min-width: 180px;
         color: grey;
     }
 
@@ -250,6 +261,20 @@ th {
 
         &--red {
             background-color: #ff855e;
+        }
+
+        &--launch {
+            background-color: #84e3ff;
+            position: relative;
+
+            &::after {
+                display: block;
+                content: '🚀';
+                position: absolute;
+                top: -2px;
+                left: -1px;
+                font-size: 20px;
+            }
         }
     }
 }

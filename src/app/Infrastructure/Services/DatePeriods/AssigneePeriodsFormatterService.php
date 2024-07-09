@@ -56,6 +56,7 @@ readonly class AssigneePeriodsFormatterService
                     'start' => $datePeriod->getStartDate(),
                     'end' => $datePeriod->getEndDate(),
                     'assignee_id' => $datePeriod->getAssigneeId(),
+                    'description' => $datePeriod->getDescription(),
                 ];
             }
         }

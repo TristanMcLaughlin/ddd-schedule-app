@@ -11,6 +11,7 @@ abstract class BaseDatePeriodStrategy implements DatePeriodStrategy
     protected $startDate;
     protected $endDate;
     protected $importedFromJira = true;
+    protected ?string $description = null;
 
     public function getDatePeriod(): ?DatePeriod
     {
@@ -24,7 +25,8 @@ abstract class BaseDatePeriodStrategy implements DatePeriodStrategy
             $this->assignee,
             $this->startDate,
             $this->endDate,
-            $this->importedFromJira
+            $this->importedFromJira,
+            $this->description
         );
     }
 

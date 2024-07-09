@@ -22,6 +22,7 @@ class ContentDatePeriodStrategy extends BaseDatePeriodStrategy
         $this->assignee = str_contains($epic['fields']['summary'], 'SAM') ? '712020:95961cb3-1293-4a83-bc0c-7ad3cb1291e4' : '712020:f2251f54-8c44-48fb-a37f-080cebf449c6' ;
         $this->startDate = Carbon::parse($startDate)->format('Y-m-d');
         $this->endDate = Carbon::parse($startDate)->format('Y-m-d');
+        $this->description = 'Content';
 
         return $this->getDatePeriod();
     }

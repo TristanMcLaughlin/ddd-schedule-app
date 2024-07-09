@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Domain\Entities\BacklogTicket;
@@ -46,6 +47,8 @@ class EloquentBacklogTicketRepositoryTest extends TestCase
 
     public function test_list_backlog_tickets()
     {
+        Carbon::setTestNow(Carbon::create(2024, 3, 1));
+
         $backlogTicket1 = new BacklogTicket(
             'TICKET-123',
             'assignee-1',

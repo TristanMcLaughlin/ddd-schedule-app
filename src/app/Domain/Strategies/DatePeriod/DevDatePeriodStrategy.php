@@ -21,6 +21,7 @@ class DevDatePeriodStrategy extends BaseDatePeriodStrategy
         $this->assignee = $epic['fields']['customfield_10152']['accountId'] ?? 'unassigned-developer';
         $this->startDate = Carbon::parse($startDate)->addDay()->format('Y-m-d');
         $this->endDate = Carbon::parse($qaDueDate)->format('Y-m-d');
+        $this->description = 'Dev';
 
         return $this->getDatePeriod();
     }

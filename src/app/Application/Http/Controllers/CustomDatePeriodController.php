@@ -39,7 +39,8 @@ class CustomDatePeriodController
             $request->input('assignee_id'),
             $request->input('start_date'),
             $request->input('end_date'),
-            false // importedFromJira flag set to false
+            false, // importedFromJira flag set to false
+            null
         );
 
         $this->datePeriodRepository->save($datePeriod);

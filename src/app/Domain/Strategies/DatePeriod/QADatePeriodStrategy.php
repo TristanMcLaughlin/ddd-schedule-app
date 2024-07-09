@@ -21,6 +21,7 @@ class QADatePeriodStrategy extends BaseDatePeriodStrategy
         $this->assignee = '604f1df4311e270068ab9075'; // Hardcoded QA assignee ID
         $this->startDate = Carbon::parse($qaDueDate)->addDay()->format('Y-m-d');
         $this->endDate = Carbon::parse($pmDueDate)->format('Y-m-d');
+        $this->description = 'QA';
 
         return $this->getDatePeriod();
     }
