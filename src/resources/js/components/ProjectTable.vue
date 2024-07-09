@@ -90,6 +90,7 @@ export default {
                     highlighted: true,
                     'highlighted--start': isStart,
                     'highlighted--end': isEnd,
+                    'highlighted--launch': matchingPeriod.description === 'Launch',
                 };
             }
 
@@ -250,6 +251,20 @@ th {
 
         &--red {
             background-color: #ff855e;
+        }
+
+        &--launch {
+            background-color: #84e3ff;
+            position: relative;
+
+            &::after {
+                display: block;
+                content: '🚀';
+                position: absolute;
+                top: -2px;
+                left: -1px;
+                font-size: 20px;
+            }
         }
     }
 }

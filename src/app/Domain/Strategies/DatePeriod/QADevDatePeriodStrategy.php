@@ -20,6 +20,7 @@ class QADevDatePeriodStrategy extends BaseDatePeriodStrategy
         $this->assignee = $epic['fields']['customfield_10152']['accountId'];
         $this->startDate = Carbon::parse($pmDueDate)->subDays(3)->format('Y-m-d');
         $this->endDate = Carbon::parse($pmDueDate)->subDay()->format('Y-m-d');
+        $this->description = 'Dev';
 
         return $this->getDatePeriod();
     }

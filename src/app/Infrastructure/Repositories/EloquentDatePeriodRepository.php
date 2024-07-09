@@ -28,6 +28,7 @@ class EloquentDatePeriodRepository implements DatePeriodRepository
                 'start_date' => $datePeriod->getStartDate(),
                 'end_date' => $datePeriod->getEndDate(),
                 'imported_from_jira' => $datePeriod->isImportedFromJira(),
+                'description' => $datePeriod->getDescription(),
             ]
         );
     }

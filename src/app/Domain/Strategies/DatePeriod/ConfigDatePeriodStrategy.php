@@ -20,7 +20,7 @@ class ConfigDatePeriodStrategy extends BaseDatePeriodStrategy
         $this->assignee = '63fca0987655a3223a217054'; // Hardcoded config assignee ID
         $this->startDate = Carbon::parse($startDate)->addDay()->format('Y-m-d');
         $this->endDate = Carbon::parse($this->startDate)->format('Y-m-d');
-
+        $this->description = 'Config';
         return $this->getDatePeriod();
     }
 }
