@@ -178,7 +178,7 @@ export default {
     border-collapse: collapse;
 
     .project-name, .status {
-        min-width: 150px;
+        min-width: 180px;
         color: grey;
     }
 
