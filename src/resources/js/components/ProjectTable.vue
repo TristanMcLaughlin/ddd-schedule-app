@@ -45,6 +45,7 @@
                         'is-today': isDateToday(date),
                         ...projectColourClass(project),
                         }"
+                        :title="getDescription(date, project.date_periods, assignee.id)"
                     ></td>
                 </tr>
                 <BacklogTicketsRow
@@ -157,6 +158,15 @@ export default {
             return this.getBacklogTicketsForAssignee(assigneeId).filter(ticket =>
                 !this.selectedProject || ticket.summary.includes(this.selectedProject)
             );
+        },
+        getDescription(date, datePeriods, assigneeId) {
+            const current = moment(date);
+            const matchingPeriod = datePeriods.find(period =>
+                period.assignee_id === assigneeId &&
+                current.isBetween(moment(period.start), moment(period.end), 'days', '[]')
+            );
+
+            return matchingPeriod?.description ?? null;
         },
     },
 };
