@@ -16,3 +16,5 @@ A simple scheduling app to help move Jira tickets into the schedule so I don't h
 
 Note:
 I went half DDD on this one and made some kind of weird hybrid where Eloquent migrations and the front end are split apart from any layer. I haven't worked on cleaning up the directories and moving them from a typical Laravel structure so much, just wanted to get this prototype out the door and usable so I could use my time more productively.
+
+Node is not containerised yet, but it uses v22. I use nvm locally for version switching when needed.
