@@ -12,3 +12,7 @@ A simple scheduling app to help move Jira tickets into the schedule so I don't h
 - You'd just add a prod docker yaml file to deploy which grabs the secrets from whatever service you use (Probs github secrets or if using CICD the secrets stored in there)
 
 - yay
+
+
+Note:
+I went half DDD on this one and made some kind of weird hybrid where Eloquent migrations and the front end are split apart from any layer. I haven't worked on cleaning up the directories and moving them from a typical Laravel structure so much, just wanted to get this prototype out the door and usable so I could use my time more productively.
