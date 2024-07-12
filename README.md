@@ -18,3 +18,15 @@ Note:
 I went half DDD on this one and made some kind of weird hybrid where Eloquent migrations and the front end are split apart from any layer. I haven't worked on cleaning up the directories and moving them from a typical Laravel structure so much, just wanted to get this prototype out the door and usable so I could use my time more productively.
 
 Node is not containerised yet, but it uses v22. I use nvm locally for version switching when needed.
+
+Pictures
+
+Light mode - All projects
+<img width="1200" alt="Screenshot 2024-07-12 at 17 52 56" src="https://github.com/user-attachments/assets/362e4fa8-997b-475c-abde-b21e8bcaf03e">
+
+Dark mode - All projects
+<img width="1200" alt="Screenshot 2024-07-12 at 17 56 13" src="https://github.com/user-attachments/assets/896ddbc4-2e8b-47d2-9de3-66b14defda2e">
+
+Single project view
+<img width="1200" alt="Screenshot 2024-07-12 at 17 54 07" src="https://github.com/user-attachments/assets/ee0efe6c-983e-4e70-b36c-efef4acf8454">
+
